@@ -1,6 +1,6 @@
-# interactive-plot
+# iPlot
 
-An example of an interactive plot app
+![iPlot](https://dl.dropboxusercontent.com/u/2904328/iPlot.png)
 
 ## Instructions
 
