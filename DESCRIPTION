@@ -1,6 +1,6 @@
-Package: InteractivePlot
+Package: iPlot
 Type: Package
-Title: R File Service
+Title: Interactive Plot
 Version: 1.0
 Date: 2013-09-01
 Author: Thomas Reinholdsson

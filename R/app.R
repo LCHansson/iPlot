@@ -7,10 +7,10 @@
 #' @param ... see runApp()
 #' 
 #' @examples 
-#' iplot("Pulse", "Age", MASS::survey, c("Pulse", "Age"))
+#' iPlot("Pulse", "Age", MASS::survey, c("Pulse", "Age"))
 #' 
 #' @export
-iplot <- function(x, y, data, vars, ...) {
+iPlot <- function(x, y, data, vars, ...) {
   
   # Subset data
   data <- data[ , unique(c(x, y, vars))]
