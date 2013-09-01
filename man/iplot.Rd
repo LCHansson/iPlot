@@ -2,7 +2,7 @@
 \alias{iplot}
 \title{Interactive Plot}
 \usage{
-  iplot(data, vars, ...)
+  iplot(x, y, data, vars, ...)
 }
 \arguments{
   \item{data}{dataset}
@@ -13,5 +13,8 @@
 }
 \description{
   ...
+}
+\examples{
+iplot("Pulse", "Age", MASS::survey, c("Pulse", "Age"))
 }
 

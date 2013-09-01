@@ -1,6 +1,3 @@
-# data <- na.omit(as.data.table(MASS::survey))
-# vars = c("Pulse", "Age")
-
 #' Interactive Plot
 #' 
 #' ...
@@ -9,17 +6,30 @@
 #' @param vars filter variables
 #' @param ... see runApp()
 #' 
+#' @examples 
+#' iplot("Pulse", "Age", MASS::survey, c("Pulse", "Age"))
+#' 
 #' @export
-iplot <- function(data, vars, ...) {
+iplot <- function(x, y, data, vars, ...) {
   
-  data <- na.omit(data)
+  # Subset data
+  data <- data[ , unique(c(x, y, vars))]
   
+  # Remove NA's
+  pre_nrow <- nrow(data)
+  data <- na.omit(as.data.table(data))
+  diff <- pre_nrow - nrow(data)
+  if (diff > 0) {
+    warning(paste(diff, "NA rows has been removed"))
+  }
+  
+  # Run app
   runApp(
     list(
       ui = pageWithSidebar(
         headerPanel(""),
         sidebarPanel(
-          uiOutput("left_filter")
+          uiOutput("filters")
         ),
         mainPanel(
           plotOutput("main_plot", height = 600, width = 500)
@@ -27,10 +37,13 @@ iplot <- function(data, vars, ...) {
       ),
       server = function(input, output, session) {
         main_data <- reactive({
-          data # TODO
+          conditions <- lapply(vars, function(i) {
+            data[[i]] <= max(rv[[i]]) & data[[i]] >= min(rv[[i]])
+          })
+          data[do.call("&", conditions),]
         })
         
-        output$left_filter <- renderUI({
+        output$filters <- renderUI({
           plot_output_list <- lapply(vars, function(i) {
             tagList(
               plotOutput(paste0("plot", i), height = 250, width = 350, clickId = paste0("click", i)),
@@ -41,7 +54,7 @@ iplot <- function(data, vars, ...) {
         })
       
         output$main_plot <- renderPlot({
-          plot(main_data()$Age, main_data()$Pulse)
+          plot(main_data()[[x]], main_data()[[y]])
         })
         
         rv <- reactiveValues()
