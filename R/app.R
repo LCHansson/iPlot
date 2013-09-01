@@ -32,7 +32,7 @@ iplot <- function(x, y, data, vars, ...) {
           uiOutput("filters")
         ),
         mainPanel(
-          plotOutput("main_plot", height = 600, width = 500)
+          plotOutput("main_plot", height = 600, width = 800)
         )
       ),
       server = function(input, output, session) {
@@ -54,7 +54,7 @@ iplot <- function(x, y, data, vars, ...) {
         })
       
         output$main_plot <- renderPlot({
-          plot(main_data()[[x]], main_data()[[y]])
+          plot(x = main_data()[[x]], y = main_data()[[y]], xlab = x, ylab = y)
         })
         
         rv <- reactiveValues()
