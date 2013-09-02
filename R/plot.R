@@ -11,11 +11,9 @@ mini_plot <- function(title, vec, sel) {
     abline(v = sel)
     abline(h = max(table(vec))/2, lty="dashed")
     usr <- par('usr')
-    #rect(usr[1], max(table(vec))/2, usr[2], usr[4], lty="dashed")
-    #rect(usr[1], max(table(vec))/2, usr[2], usr[3], lty="dashed")
     if(!is.null(min(sel))) {
       if(!is.null(max(sel))){
-        rect(min(sel), usr[3], max(sel), usr[4], col=rgb(0, 0, 0,0.5))
+        rect(min(sel), usr[3], max(sel), usr[4], col=rgb(0, 0, 0,0.2))
       }
     }
     mtext(title, side=3, line=0, adj=0, cex=1, col="black")

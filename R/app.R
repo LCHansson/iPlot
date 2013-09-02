@@ -7,8 +7,9 @@
 #' @param ... see runApp()
 #' 
 #' @examples 
-#' iPlot("Pulse", "Age", MASS::survey, c("Pulse", "Age"))
-#' 
+#' \dontrun{
+#' iPlot("Pulse", "Age", MASS::survey, c("Pulse", "Age", "Height", "NW.Hnd", "Wr.Hnd"))
+#' }
 #' @export
 iPlot <- function(x, y, data, vars, ...) {
   
@@ -40,7 +41,7 @@ iPlot <- function(x, y, data, vars, ...) {
           conditions <- lapply(vars, function(i) {
             data[[i]] <= max(rv[[i]]) & data[[i]] >= min(rv[[i]])
           })
-          data[do.call("&", conditions),]
+          data[Reduce("&", conditions),]
         })
         
         output$filters <- renderUI({

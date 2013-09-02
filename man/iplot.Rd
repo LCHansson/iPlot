@@ -15,6 +15,8 @@
   ...
 }
 \examples{
-iPlot("Pulse", "Age", MASS::survey, c("Pulse", "Age"))
+\dontrun{
+iPlot("Pulse", "Age", MASS::survey, c("Pulse", "Age", "Height", "NW.Hnd", "Wr.Hnd"))
+}
 }
 
