@@ -6,14 +6,18 @@
 #' @param vec data vector
 #' @param sel user input; vector of length two (c(min, max))
 mini_plot <- function(title, vec, sel) {
-    plot(table(vec), main = title, sub = paste("min:", min(sel), "\nmax:", max(sel)), xlab = "", ylab = "")
+    op <- par(mar = c(2, 0, 1, 0))
+    plot(table(vec), xlab = "", ylab = "")
     abline(v = sel)
+    abline(h = max(table(vec))/2, lty="dashed")
     usr <- par('usr')
-    rect(usr[1], max(table(vec))/2, usr[2], usr[4])
-    rect(usr[1], max(table(vec))/2, usr[2], usr[3])
+    #rect(usr[1], max(table(vec))/2, usr[2], usr[4], lty="dashed")
+    #rect(usr[1], max(table(vec))/2, usr[2], usr[3], lty="dashed")
     if(!is.null(min(sel))) {
       if(!is.null(max(sel))){
         rect(min(sel), usr[3], max(sel), usr[4], col=rgb(0, 0, 0,0.5))
       }
-  }
+    }
+    mtext(title, side=3, line=0, adj=0, cex=1, col="black")
+    par(op)
 }

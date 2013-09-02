@@ -26,12 +26,12 @@ iPlot <- function(x, y, data, vars, ...) {
   # Run app
   runApp(
     list(
-      ui = pageWithSidebar(
-        headerPanel(""),
-        sidebarPanel(
+      ui = bootstrapPage(
+        div(class="span4",
+          br(),
           uiOutput("filters")
         ),
-        mainPanel(
+        div(class="span8",
           plotOutput("main_plot", height = 600, width = 800)
         )
       ),
@@ -46,7 +46,7 @@ iPlot <- function(x, y, data, vars, ...) {
         output$filters <- renderUI({
           plot_output_list <- lapply(vars, function(i) {
             tagList(
-              plotOutput(paste0("plot", i), height = 250, width = 350, clickId = paste0("click", i)),
+              plotOutput(paste0("plot", i), height = 100, width = 250, clickId = paste0("click", i)),
               textOutput(paste0("text", i))
             )
           })
