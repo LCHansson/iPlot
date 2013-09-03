@@ -28,11 +28,11 @@ iPlot <- function(x, y, data, vars, ...) {
   runApp(
     list(
       ui = bootstrapPage(
-        div(class="span4",
+        div(class="span3",
           br(),
           uiOutput("filters")
         ),
-        div(class="span8",
+        div(class="span9",
           plotOutput("main_plot", height = 600, width = 800)
         )
       ),
