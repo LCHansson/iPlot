@@ -7,9 +7,10 @@
 #' @param sel user input; vector of length two (c(min, max))
 mini_plot <- function(title, vec, sel) {
     op <- par(mar = c(2, 0, 1, 0))
-    plot(table(vec), xlab = "", ylab = "")
+    plot(table(vec), xlab = "", ylab = "", bty="n", yaxt="n")
     abline(v = sel)
-    abline(h = max(table(vec))/2, lty="dashed")
+    middle <- max(table(vec))/2
+    segments(sel[1], middle, sel[2], middle, lty = "dashed")
     usr <- par('usr')
     if(!is.null(min(sel))) {
       if(!is.null(max(sel))){
