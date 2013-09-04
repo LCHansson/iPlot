@@ -12,10 +12,11 @@
 #' 
 #' @examples 
 #' \dontrun{
-#' iPlot("Pulse", "Age", MASS::survey, c("Pulse", "Age", "Height", "NW.Hnd", "Wr.Hnd"))
+#' iPlot(x = "Pulse", y = "Exer", data = MASS::survey)
+#' iPlot(x = "Pulse", y = "Smoke", data = MASS::survey, vars = c("Height", "NW.Hnd", "Wr.Hnd"))
 #' }
 #' @export
-iPlot <- function(x, y, data, vars, height = 100, width = 250, ...) {
+iPlot <- function(x, y = NULL, data, vars = names(data)[sapply(data, is.numeric)], height = 600, width = 800, ...) {
   
   # Subset data
   data <- data[ , unique(c(x, y, vars))]
