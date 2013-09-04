@@ -3,23 +3,34 @@
 #' ...
 #' 
 #' @param x variable
-#' @paran y color variable
+#' @paran fill fill variable
 #' @param data dataset
 #' @param vars filter variables
 #' @param height height (app)
 #' @param width width (app)
+#' @param geom main plot geom function
 #' @param ... see runApp()
 #' 
 #' @examples 
 #' \dontrun{
-#' iPlot(x = "Pulse", y = "Exer", data = MASS::survey)
-#' iPlot(x = "Pulse", y = "Smoke", data = MASS::survey, vars = c("Height", "NW.Hnd", "Wr.Hnd"))
+#' iPlot(x = "Pulse", fill = "Exer", data = MASS::survey)
+#' iPlot(x = "Pulse", fill = "Smoke", data = MASS::survey, vars = c("Height", "NW.Hnd", "Wr.Hnd"))
+#' iPlot(x = "Height", fill = "Exer", data = MASS::survey, geom = geom_bar())
 #' }
 #' @export
-iPlot <- function(x, y = NULL, data, vars = names(data)[sapply(data, is.numeric)], height = 600, width = 800, ...) {
+iPlot <- function(
+  x = names(data)[1],
+  fill = NULL,
+  data,
+  vars = names(data)[sapply(data, is.numeric)],
+  height = 600,
+  width = 800,
+  geom = geom_density(alpha = .3),
+  ...
+){
   
   # Subset data
-  data <- data[ , unique(c(x, y, vars))]
+  data <- data[ , unique(c(x, fill, vars))]
   
   # Remove NA's
   pre_nrow <- nrow(data)
@@ -33,7 +44,9 @@ iPlot <- function(x, y = NULL, data, vars = names(data)[sapply(data, is.numeric)
   runApp(
     list(
       ui = bootstrapPage(
-        HTML("<table><tr><td>"),
+        HTML("<table><tr><td colspan=2>"),
+        uiOutput("count"),
+        HTML("</td></tr><tr><td>"),
         uiOutput("filters"),
         HTML("</td><td>"),
         plotOutput("main_plot", height = height, width = width*0.8),
@@ -61,10 +74,16 @@ iPlot <- function(x, y = NULL, data, vars = names(data)[sapply(data, is.numeric)
           do.call(tagList, plot_output_list)
         })
         
+        output$count <- renderText({
+          sprintf("Selected %s out of %s, whereas %s deleted because of missing values.",
+            nrow(main_data()),
+            pre_nrow,
+            pre_nrow-nrow(data)
+          )
+        })
+        
         output$main_plot <- renderPlot({
-          require(ggplot2)
-          require(ggthemes)
-          p <- ggplot(main_data(), aes_string(x = x, fill = y)) + geom_density(alpha=.3) + theme_tufte()
+          p <- ggplot(main_data(), aes_string(x = x, fill = fill)) + geom + theme_bw()
           print(p)
         })
         
