@@ -18,6 +18,6 @@ mini_plot <- function(title, vec, sel) {
         rect(min(sel), usr[3], max(sel), usr[4])
       }
     }
-    mtext(title, side=3, line=0, adj=0, cex=0.9, col="black")
+    mtext(sprintf("%s, %s-%s", title, min(sel), max(sel)), side=3, line=0, adj=0, cex=0.9, col="black")
     par(op)
 }
