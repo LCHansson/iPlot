@@ -8,7 +8,6 @@ Maintainer: Thomas Reinholdsson <reinholdsson@gmail.com>
 Description: ...
 License: GPLv3
 Depends:
-    data.table,
     shiny,
     ggplot2
 Collate:
