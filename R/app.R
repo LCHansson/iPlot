@@ -28,17 +28,6 @@ iPlot <- function(
   ...
 ){
   
-  # Subset data
-  # data <- data[ , unique(c(x, fill, vars))]
-  
-  # Remove NA's
-#   pre_nrow <- nrow(data)
-#   data <- na.omit(as.data.table(data))
-#   diff <- pre_nrow - nrow(data)
-#   if (diff > 0) {
-#     warning(paste(diff, "NA rows has been removed"))
-#   }
-  
   static <- iData(data)
   vars = static$numerics
   
@@ -49,7 +38,7 @@ iPlot <- function(
         HTML("<table><tr><td colspan=2>"),
         uiOutput("count"),
         HTML("</td></tr><tr><td>"),
-        uiOutput("filters"),
+        uiOutput("plot_filters"),
         HTML("</td><td>"),
         plotOutput("main_plot", height = height, width = width*0.8),
         HTML("</td></tr></table>")
@@ -62,7 +51,7 @@ iPlot <- function(
           static$data[Reduce("&", conditions),]
         })
         
-        output$filters <- renderUI({
+        output$plot_filters <- renderUI({
           plot_output_list <- lapply(vars, function(i) {
             tagList(
               plotOutput(
