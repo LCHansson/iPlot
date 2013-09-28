@@ -2,10 +2,9 @@
 \alias{iPlot}
 \title{Interactive Plot}
 \usage{
-  iPlot(x = names(data)[1], y = NULL, data,
-    vars = names(data)[sapply(data, is.numeric)],
+  iPlot(x = names(data)[1], fill = NULL, data,
     height = 600, width = 800,
-    geom = geom_hist(alpha = 0.3), ...)
+    geom = geom_density(alpha = 0.3), ...)
 }
 \arguments{
   \item{x}{variable}
@@ -18,6 +17,8 @@
 
   \item{width}{width (app)}
 
+  \item{geom}{main plot geom function}
+
   \item{...}{see runApp()}
 }
 \description{
@@ -25,8 +26,9 @@
 }
 \examples{
 \dontrun{
-iPlot(x = "Pulse", y = "Exer", data = MASS::survey)
-iPlot(x = "Pulse", y = "Smoke", data = MASS::survey, vars = c("Height", "NW.Hnd", "Wr.Hnd"))
+iPlot(x = "Pulse", fill = "Exer", data = MASS::survey)
+iPlot(x = "Pulse", fill = "Smoke", data = MASS::survey, vars = c("Height", "NW.Hnd", "Wr.Hnd"))
+iPlot(x = "Height", fill = "Exer", data = MASS::survey, geom = geom_bar())
 }
 }
 

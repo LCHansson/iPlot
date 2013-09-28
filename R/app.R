@@ -22,7 +22,6 @@ iPlot <- function(
   x = names(data)[1],
   fill = NULL,
   data,
-  vars = names(data)[sapply(data, is.numeric)],
   height = 600,
   width = 800,
   geom = geom_density(alpha = .3),
@@ -30,15 +29,18 @@ iPlot <- function(
 ){
   
   # Subset data
-  data <- data[ , unique(c(x, fill, vars))]
+  # data <- data[ , unique(c(x, fill, vars))]
   
   # Remove NA's
-  pre_nrow <- nrow(data)
-  data <- na.omit(as.data.table(data))
-  diff <- pre_nrow - nrow(data)
-  if (diff > 0) {
-    warning(paste(diff, "NA rows has been removed"))
-  }
+#   pre_nrow <- nrow(data)
+#   data <- na.omit(as.data.table(data))
+#   diff <- pre_nrow - nrow(data)
+#   if (diff > 0) {
+#     warning(paste(diff, "NA rows has been removed"))
+#   }
+  
+  static <- iData(data)
+  vars = static$numerics
   
   # Run app
   runApp(
@@ -55,9 +57,9 @@ iPlot <- function(
       server = function(input, output, session) {
         main_data <- reactive({
           conditions <- lapply(vars, function(i) {
-            data[[i]] <= max(rv[[i]]) & data[[i]] >= min(rv[[i]])
+            static$data[[i]] <= max(rv[[i]]) & static$data[[i]] >= min(rv[[i]])
           })
-          data[Reduce("&", conditions),]
+          static$data[Reduce("&", conditions),]
         })
         
         output$filters <- renderUI({
@@ -77,8 +79,8 @@ iPlot <- function(
         output$count <- renderText({
           sprintf("Selected %s out of %s, whereas %s deleted because of missing values.",
             nrow(main_data()),
-            pre_nrow,
-            pre_nrow-nrow(data)
+            nrow(static$data),
+            static$removed_na
           )
         })
         
@@ -92,10 +94,10 @@ iPlot <- function(
       
           local({
             i <- var
-            rv[[i]] <- c(min(data[[i]], na.rm = T), max(data[[i]], na.rm = T))
+            rv[[i]] <- c(min(static$data[[i]], na.rm = T), max(static$data[[i]], na.rm = T))
               
             observe({
-              rv[[i]] <- setInput(rv[[i]], input[[paste0("click", i)]], max(table(data[[i]]))/2)
+              rv[[i]] <- setInput(rv[[i]], input[[paste0("click", i)]], max(table(static$data[[i]]))/2)
             })
           })
           
@@ -103,7 +105,7 @@ iPlot <- function(
             i <- var
             
             output[[paste0("plot", i)]] <- renderPlot({
-              mini_plot(i, data[[i]], rv[[i]])
+              mini_plot(i, static$data[[i]], rv[[i]])
             })
           })
         }
