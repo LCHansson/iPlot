@@ -14,7 +14,6 @@
 #' @examples 
 #' \dontrun{
 #' iPlot(x = "Pulse", fill = "Exer", data = MASS::survey)
-#' iPlot(x = "Pulse", fill = "Smoke", data = MASS::survey, vars = c("Height", "NW.Hnd", "Wr.Hnd"))
 #' iPlot(x = "Height", fill = "Exer", data = MASS::survey, geom = geom_bar())
 #' }
 #' @export
@@ -38,20 +37,30 @@ iPlot <- function(
         HTML("<table><tr><td colspan=2>"),
         uiOutput("count"),
         HTML("</td></tr><tr><td>"),
-        uiOutput("plot_filters"),
+        uiOutput("num_filter"),
         HTML("</td><td>"),
         plotOutput("main_plot", height = height, width = width*0.8),
+        HTML("</td><td>"),
+        uiOutput("cat_filter"),
         HTML("</td></tr></table>")
       ),
       server = function(input, output, session) {
         main_data <- reactive({
-          conditions <- lapply(vars, function(i) {
+          num_conditions <- lapply(vars, function(i) {
             static$data[[i]] <= max(rv[[i]]) & static$data[[i]] >= min(rv[[i]])
           })
-          static$data[Reduce("&", conditions),]
+          
+          cat_conditions <- lapply(static$categories, function(i) {
+              if(length(input[[paste0('menu',i)]])>0) {
+                 static$data[[i]] %in% input[[paste0('menu',i)]]
+              } else {
+                 TRUE
+              }
+           })
+          static$data[Reduce("&", c(num_conditions, cat_conditions)), ]
         })
         
-        output$plot_filters <- renderUI({
+        output$num_filter <- renderUI({
           plot_output_list <- lapply(vars, function(i) {
             tagList(
               plotOutput(
@@ -62,8 +71,20 @@ iPlot <- function(
               textOutput(paste0("text", i))
             )
           })
+          
           do.call(tagList, plot_output_list)
         })
+        
+        output$cat_filter <- renderUI({
+           selector_menu_list <- lapply(static$categories, function(i) {
+              choice_lst=unique(static$data[[i]])
+              tagList(
+                 selectInput(paste0("menu",i), label=i, choices=choice_lst, multiple=TRUE)
+              )
+           })
+           do.call(tagList,selector_menu_list)
+        })
+            
         
         output$count <- renderText({
           sprintf("Selected %s out of %s, whereas %s deleted because of missing values.",

@@ -27,7 +27,6 @@
 \examples{
 \dontrun{
 iPlot(x = "Pulse", fill = "Exer", data = MASS::survey)
-iPlot(x = "Pulse", fill = "Smoke", data = MASS::survey, vars = c("Height", "NW.Hnd", "Wr.Hnd"))
 iPlot(x = "Height", fill = "Exer", data = MASS::survey, geom = geom_bar())
 }
 }
