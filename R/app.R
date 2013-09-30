@@ -77,12 +77,14 @@ iPlot <- function(
         
         output$cat_filter <- renderUI({
            selector_menu_list <- lapply(static$categories, function(i) {
-              choice_lst=unique(static$data[[i]])
+              tbl <- table(static$data[[i]])
+              choice_lst = names(tbl)
+              names(choice_lst) <- sprintf("%s (%s)", choice_lst, tbl)
               tagList(
                  selectInput(paste0("menu",i), label=i, choices=choice_lst, multiple=TRUE)
               )
            })
-           do.call(tagList,selector_menu_list)
+           do.call(tagList, selector_menu_list)
         })
             
         
@@ -119,7 +121,7 @@ iPlot <- function(
             i <- var
             
             output[[paste0("plot", i)]] <- renderPlot({
-              mini_plot(i, static$data[[i]], rv[[i]])
+              mini_plot(i, paste(format(rv[[i]], digits = 3), collapse = "-"), static$data[[i]], rv[[i]])
             })
           })
         }

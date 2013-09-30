@@ -2,7 +2,7 @@
 \alias{mini_plot}
 \title{Mini plot}
 \usage{
-  mini_plot(title, vec, sel)
+  mini_plot(title, subtitle = "", vec, sel)
 }
 \arguments{
   \item{title}{plot title}
