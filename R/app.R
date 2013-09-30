@@ -86,7 +86,11 @@ iPlot <- function(
             rv[[i]] <- c(min(static$data[[i]], na.rm = T), max(static$data[[i]], na.rm = T))
               
             observe({
-              rv[[i]] <- setInput(rv[[i]], input[[paste0("click", i)]], max(table(static$data[[i]]))/2)
+              rv[[i]] <- setInput(
+                rv[[i]],
+                input[[paste0("click", i)]],
+                max(density(static$data[[i]])$y)/2
+              )
             })
           })
           
