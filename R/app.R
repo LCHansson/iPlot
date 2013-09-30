@@ -58,11 +58,14 @@ iPlot <- function(
         })
         
         output$select_fill <- renderUI({
-          selectInput("fill", label = "Select fill variable:", choices = static$all)
+          cats <- get_vars(static$categories, "categorical")
+          nums <- get_vars(static$numerics, "numerical")
+          vars <- c(cats, nums)
+          selectInput("fill", label = "Select fill variable:", choices = vars)
         })
         
         output$select_density <- renderUI({
-          selectInput("density", label = "Select density variable:", choices = static$numerics)
+          selectInput("density", label = "Select density variable:", choices = get_vars(static$numerics, "numerical"))
         })
         
         output$num_filter <- renderUI({
@@ -140,3 +143,9 @@ iPlot <- function(
     )
   , ...)
 }
+
+get_vars <- function(vars, type) {
+  names(vars) <- sprintf("%s (%s)", vars, type)
+  return(vars)
+}
+          

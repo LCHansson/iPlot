@@ -23,6 +23,7 @@
 \dontrun{
 iPlot(MASS::survey)
 iPlot(mtcars, geom = geom_bar())
+iPlot(as.data.table(ggplot2::diamonds))
 }
 }
 
