@@ -2,16 +2,11 @@
 \alias{iPlot}
 \title{Interactive Plot}
 \usage{
-  iPlot(x = names(data)[1], fill = NULL, data,
-    height = 600, width = 800,
+  iPlot(data, height = 600, width = 800,
     geom = geom_density(alpha = 0.3), ...)
 }
 \arguments{
-  \item{x}{variable}
-
   \item{data}{dataset}
-
-  \item{vars}{filter variables}
 
   \item{height}{height (app)}
 
@@ -26,8 +21,8 @@
 }
 \examples{
 \dontrun{
-iPlot(x = "Pulse", fill = "Exer", data = MASS::survey)
-iPlot(x = "Height", fill = "Exer", data = MASS::survey, geom = geom_bar())
+iPlot(MASS::survey)
+iPlot(mtcars, geom = geom_bar())
 }
 }
 

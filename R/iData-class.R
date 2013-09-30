@@ -4,6 +4,7 @@ iData <- setRefClass(
     data = "ANY",
     categories = "character",
     numerics = "character",
+    all = "character",
     removed_na = "numeric",
     levels = "list"
   ),
@@ -22,6 +23,7 @@ iData <- setRefClass(
       )
       numerics <<- filter(is.numeric)
       levels <<- lapply(data, levels)
+      all <<- names(data)
     },
     filter = function(fun) {
       names(data)[sapply(data, fun)]

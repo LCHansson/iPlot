@@ -2,10 +2,7 @@
 #' 
 #' ...
 #' 
-#' @param x variable
-#' @paran fill fill variable
 #' @param data dataset
-#' @param vars filter variables
 #' @param height height (app)
 #' @param width width (app)
 #' @param geom main plot geom function
@@ -13,13 +10,11 @@
 #' 
 #' @examples 
 #' \dontrun{
-#' iPlot(x = "Pulse", fill = "Exer", data = MASS::survey)
-#' iPlot(x = "Height", fill = "Exer", data = MASS::survey, geom = geom_bar())
+#' iPlot(MASS::survey)
+#' iPlot(mtcars, geom = geom_bar())
 #' }
 #' @export
 iPlot <- function(
-  x = names(data)[1],
-  fill = NULL,
   data,
   height = 600,
   width = 800,
@@ -28,12 +23,13 @@ iPlot <- function(
 ){
   
   static <- iData(data)
-  vars = static$numerics
   
   # Run app
   runApp(
     list(
       ui = bootstrapPage(
+        uiOutput("select_fill"),
+        uiOutput("select_density"),
         HTML("<table><tr><td colspan=2>"),
         uiOutput("count"),
         HTML("</td></tr><tr><td>"),
@@ -46,7 +42,7 @@ iPlot <- function(
       ),
       server = function(input, output, session) {
         main_data <- reactive({
-          num_conditions <- lapply(vars, function(i) {
+          num_conditions <- lapply(static$numerics, function(i) {
             static$data[[i]] <= max(rv[[i]]) & static$data[[i]] >= min(rv[[i]])
           })
           
@@ -60,12 +56,20 @@ iPlot <- function(
           static$data[Reduce("&", c(num_conditions, cat_conditions)), ]
         })
         
+        output$select_fill <- renderUI({
+          selectInput("fill", label = "Select fill variable:", choices = static$all)
+        })
+        
+        output$select_density <- renderUI({
+          selectInput("density", label = "Select density variable:", choices = static$numerics)
+        })
+        
         output$num_filter <- renderUI({
-          plot_output_list <- lapply(vars, function(i) {
+          plot_output_list <- lapply(static$numerics, function(i) {
             tagList(
               plotOutput(
                 paste0("plot", i),
-                height = ifelse(height/length(vars) > 100, 100, height/length(vars)), 
+                height = ifelse(height/length(static$numerics) > 100, 100, height/length(static$numerics)), 
                 width = width*0.2, clickId = paste0("click", i)
               ),
               textOutput(paste0("text", i))
@@ -81,12 +85,11 @@ iPlot <- function(
               choice_lst = names(tbl)
               names(choice_lst) <- sprintf("%s (%s)", choice_lst, tbl)
               tagList(
-                 selectInput(paste0("menu",i), label=i, choices=choice_lst, multiple=TRUE)
+                 selectInput(paste0("menu",i), label = i, choices = choice_lst, multiple = TRUE)
               )
            })
            do.call(tagList, selector_menu_list)
         })
-            
         
         output$count <- renderText({
           sprintf("Selected %s out of %s, whereas %s deleted because of missing values.",
@@ -97,12 +100,14 @@ iPlot <- function(
         })
         
         output$main_plot <- renderPlot({
-          p <- ggplot(main_data(), aes_string(x = x, fill = fill)) + geom + theme_bw()
+          data <- main_data()
+          data[[input$fill]] <- as.factor(data[[input$fill]])
+          p <- ggplot(data, aes_string(x = input$density, fill = input$fill)) + geom + theme_bw()
           print(p)
         })
         
         rv <- reactiveValues()
-        for (var in vars) {
+        for (var in static$numerics) {
       
           local({
             i <- var
@@ -121,7 +126,12 @@ iPlot <- function(
             i <- var
             
             output[[paste0("plot", i)]] <- renderPlot({
-              mini_plot(i, paste(format(rv[[i]], digits = 3), collapse = "-"), static$data[[i]], rv[[i]])
+              mini_plot(
+                i,
+                paste(format(rv[[i]], digits = 3), collapse = "-"),
+                static$data[[i]],
+                rv[[i]]
+              )
             })
           })
         }
