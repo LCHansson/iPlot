@@ -9,9 +9,11 @@ Description: ...
 License: GPLv3
 Depends:
     shiny,
+    RJSONIO,
     ggplot2
 Collate:
     'app.R'
     'plot.R'
     'utils.R'
     'iData-class.R'
+    'select2.R'

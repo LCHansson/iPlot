@@ -25,31 +25,14 @@ iPlot <- function(
   
   static <- iData(data)
   
-  select2input <- function(inputId, ..., options = NULL) {
-    tagList(
-      singleton(tagList(
-        includeCSS("www/js/select2/select2.css"),
-        includeScript("www/js/select2/select2.js")
-      )
-      ),
-      selectInput(inputId = inputId, ...),
-      tags$script(sprintf("$(document).ready(function() { $('#%s').select2(%s); });", inputId, toJSON(options)))
-    )
-  }
-  
   # Run app
   runApp(
     list(
       ui = bootstrapPage(
-        #includeCSS("www/js/select2/select2.css"),
-        #includeScript("www/js/select2/select2.js"),
         HTML("<table><tr><td>"),
         uiOutput("select_fill"),
         HTML("</td><td>"),
         uiOutput("select_density"),
-        select2input("cats", label = "test categories", choices = get_vars(static$categories, "categories")),
-        #selectInput("density", label = "Select density variable:", choices = get_vars(static$numerics, "numerical")),
-        #tags$script("$(document).ready(function() { $('#density').select2({ width: 'resolve' }); });"),
         HTML("</td></tr></table>"),
         HTML("<table><tr><td>"),
         uiOutput("num_filter"),
@@ -80,15 +63,11 @@ iPlot <- function(
           cats <- get_vars(static$categories, "categorical")
           nums <- get_vars(static$numerics, "numerical")
           vars <- c(cats, nums)
-          selectInput("fill", label = "Select fill variable:", choices = vars)
+          select2input("fill", label = "Select fill variable:", choices = vars)
         })
         
          output$select_density <- renderUI({
            select2input("density", label = "Select density variable:", choices = get_vars(static$numerics, "numerical"))
-        
-#           tagList(
-#             selectInput("density", label = "Select density variable:", choices = get_vars(static$numerics, "numerical")),
-#             tags$script("$(document).ready(function() { $('#density').select2({ width: 'resolve' }); });"))
          })
         
         output$num_filter <- renderUI({
@@ -112,7 +91,7 @@ iPlot <- function(
               choice_lst = names(tbl)
               names(choice_lst) <- sprintf("%s (%s)", choice_lst, tbl)
               tagList(
-                 selectInput(paste0("menu",i), label = i, choices = choice_lst, multiple = TRUE)
+                 select2input(paste0("menu",i), label = i, choices = choice_lst, multiple = TRUE)
               )
            })
            do.call(tagList, selector_menu_list)
