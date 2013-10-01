@@ -29,17 +29,19 @@ iPlot <- function(
   runApp(
     list(
       ui = bootstrapPage(
-        uiOutput("select_fill"),
-        uiOutput("select_density"),
         HTML("<table><tr><td colspan=2>"),
-        uiOutput("count"),
-        HTML("</td></tr><tr><td>"),
+        uiOutput("select_fill"),
+        HTML("</td><td>"),
+        uiOutput("select_density"),
+        HTML("</td></tr></table>"),
+        HTML("<table><tr><td>"),
         uiOutput("num_filter"),
         HTML("</td><td>"),
         plotOutput("main_plot", height = height, width = width*0.8),
         HTML("</td><td>"),
         uiOutput("cat_filter"),
-        HTML("</td></tr></table>")
+        HTML("</td></tr></table>"),
+        uiOutput("count")
       ),
       server = function(input, output, session) {
         main_data <- reactive({
