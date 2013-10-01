@@ -2,7 +2,8 @@
 \alias{select2input}
 \title{Select2 Input}
 \usage{
-  select2input(inputId, ..., options = NULL)
+  select2input(inputId, ...,
+    options = list(width = "200px"))
 }
 \arguments{
   \item{inputId}{input id}

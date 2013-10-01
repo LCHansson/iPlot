@@ -6,14 +6,38 @@
 #' @param ... see selectInput()
 #' @param options select 2 options
 #' @export
-select2input <- function(inputId, ..., options = NULL) {
+select2input <- function(inputId, ..., options = list(width = "200px")) {
+  
+  suppressMessages(singleton(addResourcePath("js", system.file("js", package = "iPlot"))))
+  
   tagList(
-    singleton(tagList(
-      includeCSS(system.file("js/select2/select2.css", package="iPlot")),
-      includeScript(system.file("js/select2/select2.js", package="iPlot"))
-    )
+    singleton(
+      tags$head(
+        tags$script(
+          src = "js/select2/select2.js",
+          type= "text/javascript"
+        )
+      )
     ),
-    selectInput(inputId = inputId, ...),
-    tags$script(sprintf("$(document).ready(function() { $('#%s').select2(%s); });", inputId, toJSON(options)))
+    singleton(
+      tags$head(
+        tags$link(
+          rel = "stylesheet",
+          type = "text/css",
+          href = "js/select2/select2.css"
+        )
+      )
+    ),
+    selectInput(
+      inputId = inputId,
+      ...
+    ),
+    tags$script(
+      sprintf(
+        "$(document).ready(function() { $('#%s').select2(%s); });",
+        inputId,
+        toJSON(options)
+      )
+    )
   )
 }

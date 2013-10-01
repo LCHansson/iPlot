@@ -1,0 +1,32 @@
+body {
+  margin:1cm;
+  padding: 0;
+	font-size: 12px;
+}
+
+input, select, textarea {
+    font-size: 11px;
+}
+
+select {
+    width: 100%;
+    left: 0px;
+    top: 0px;
+    border: 1px solid #666;
+    text-align: right;
+}
+
+select label {
+    float: left;
+    margin: 1px;
+}
+
+h3 {
+    text-align: center;
+}
+
+td
+{
+	padding: 2px;
+  border: 5px solid #fff;
+}

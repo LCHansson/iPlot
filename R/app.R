@@ -29,19 +29,21 @@ iPlot <- function(
   runApp(
     list(
       ui = bootstrapPage(
-        HTML("<table><tr><td>"),
-        uiOutput("select_fill"),
-        HTML("</td><td>"),
-        uiOutput("select_density"),
-        HTML("</td></tr></table>"),
-        HTML("<table><tr><td>"),
-        uiOutput("num_filter"),
-        HTML("</td><td>"),
-        plotOutput("main_plot", height = height, width = width*0.8),
-        HTML("</td><td>"),
-        uiOutput("cat_filter"),
-        HTML("</td></tr></table>"),
-        uiOutput("count")
+        includeCSS(system.file("css/custom.css", package="iPlot")),
+        div(class="row",
+          div(class="span2",
+            uiOutput("num_filter")
+          ),
+          div(class="span8",
+            uiOutput("select_fill"),
+            uiOutput("select_density"),
+            plotOutput("main_plot"), #, height = height, width = width*0.8)
+            uiOutput("count")
+          ),
+          div(class="span2",
+            uiOutput("cat_filter")
+          )
+        )
       ),
       server = function(input, output, session) {
         main_data <- reactive({
@@ -50,8 +52,8 @@ iPlot <- function(
           })
           
           cat_conditions <- lapply(static$categories, function(i) {
-              if(length(input[[paste0('menu',i)]])>0) {
-                 static$data[[i]] %in% input[[paste0('menu',i)]]
+              if(length(input[[paste0("menu", i)]]) > 0) {
+                 static$data[[i]] %in% input[[paste0("menu", i)]]
               } else {
                  TRUE
               }
@@ -67,7 +69,11 @@ iPlot <- function(
         })
         
          output$select_density <- renderUI({
-           select2input("density", label = "Select density variable:", choices = get_vars(static$numerics, "numerical"))
+           select2input(
+             "density",
+             label = "Select density variable:",
+             choices = get_vars(static$numerics, "numerical")
+            )
          })
         
         output$num_filter <- renderUI({
@@ -91,7 +97,7 @@ iPlot <- function(
               choice_lst = names(tbl)
               names(choice_lst) <- sprintf("%s (%s)", choice_lst, tbl)
               tagList(
-                 select2input(paste0("menu",i), label = i, choices = choice_lst, multiple = TRUE)
+                 select2input(paste0("menu",i), label = i, choices = choice_lst, multiple = TRUE, options = list(placeholder = "select ..."))
               )
            })
            do.call(tagList, selector_menu_list)
