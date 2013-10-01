@@ -62,16 +62,13 @@ iPlot <- function(
         })
         
         output$select_fill <- renderUI({
-          cats <- get_vars(static$categories, "categorical")
-          nums <- get_vars(static$numerics, "numerical")
-          vars <- c(cats, nums)
-          select2input("fill", label = "Select fill variable:", choices = vars)
+          select2input("fill", label = "", choices = get_vars(static$categories, "categorical"))
         })
         
          output$select_density <- renderUI({
            select2input(
              "density",
-             label = "Select density variable:",
+             label = "",
              choices = get_vars(static$numerics, "numerical")
             )
          })
@@ -113,6 +110,7 @@ iPlot <- function(
         
         output$main_plot <- renderChart({
           require(data.table)
+          data <- main_data()
           data <- rbindlist(lapply(unique(data[[input$fill]]), 
             function(i) {
               d <- data[data[[input$fill]] == i, ][[input$density]]
@@ -122,6 +120,8 @@ iPlot <- function(
             }
           ))
           p <- hPlot(x = "x", y = "y", data = data, type = "line", group = "i", radius = 1)
+          p$xAxis(title = list(enabled = F), lineWidth = 0, minorTickLength = 0, tickLength = 0)
+          p$yAxis(title = list(enabled = F), labels = list(enabled = F), lineWidth = 0, gridLineWidth = 0, minorTickLength = 0, tickLength = 0)
           p$addParams(dom = 'main_plot')
           return(p)
         })
