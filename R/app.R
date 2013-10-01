@@ -29,7 +29,7 @@ iPlot <- function(
   runApp(
     list(
       ui = bootstrapPage(
-        HTML("<table><tr><td colspan=2>"),
+        HTML("<table><tr><td>"),
         uiOutput("select_fill"),
         HTML("</td><td>"),
         uiOutput("select_density"),
