@@ -22,7 +22,7 @@ iPlot <- function(
   geom = geom_density(alpha = .3),
   ...
 ){
-  
+  require(rCharts)
   static <- iData(data)
   
   # Run app
@@ -37,7 +37,7 @@ iPlot <- function(
           div(class="span8",
             uiOutput("select_fill"),
             uiOutput("select_density"),
-            plotOutput("main_plot"), #, height = height, width = width*0.8)
+            chartOutput("main_plot", "highcharts"), #, height = height, width = width*0.8)
             uiOutput("count")
           ),
           div(class="span2",
@@ -111,11 +111,19 @@ iPlot <- function(
           )
         })
         
-        output$main_plot <- renderPlot({
-          data <- main_data()
-          data[[input$fill]] <- as.factor(data[[input$fill]])
-          p <- ggplot(data, aes_string(x = input$density, fill = input$fill)) + geom + theme_bw()
-          print(p)
+        output$main_plot <- renderChart({
+          require(data.table)
+          data <- rbindlist(lapply(unique(data[[input$fill]]), 
+            function(i) {
+              d <- data[data[[input$fill]] == i, ][[input$density]]
+              if (length(d) > 1) {
+                data.table(x = density(d)$x, y = density(d)$y, i = i)
+              } else NULL
+            }
+          ))
+          p <- hPlot(x = "x", y = "y", data = data, type = "line", group = "i", radius = 1)
+          p$addParams(dom = 'main_plot')
+          return(p)
         })
         
         rv <- reactiveValues()
