@@ -4,6 +4,10 @@ body {
 	font-size: 12px;
 }
 
+label {
+  font-size: 12px;
+}
+
 input, select, textarea {
     font-size: 11px;
 }
@@ -14,6 +18,11 @@ select {
     top: 0px;
     border: 1px solid #666;
     text-align: right;
+}
+
+select[multiple] {
+    height: 35px;
+    width: 142px;
 }
 
 select label {

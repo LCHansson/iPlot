@@ -122,6 +122,7 @@ iPlot <- function(
           p <- hPlot(x = "x", y = "y", data = data, type = "line", group = "i", radius = 1)
           p$xAxis(title = list(enabled = F), lineWidth = 0, minorTickLength = 0, tickLength = 0)
           p$yAxis(title = list(enabled = F), labels = list(enabled = F), lineWidth = 0, gridLineWidth = 0, minorTickLength = 0, tickLength = 0)
+          p$legend(borderWidth = 0, verticalAlign = "top")
           p$addParams(dom = 'main_plot')
           return(p)
         })
