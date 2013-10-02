@@ -16,6 +16,11 @@ select {
     text-align: right;
 }
 
+select[multiple] {
+    height: 35px;
+    width: 14px;
+}
+
 select label {
     float: left;
     margin: 1px;
