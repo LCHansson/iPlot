@@ -32,7 +32,8 @@ iPlot <- function(
         includeCSS(system.file("css/custom.css", package="iPlot")),
         div(class="row",
           div(class="span2",
-            uiOutput("num_filter")
+            uiOutput("num_filter"),
+            bootstrapSelect("test")
           ),
           div(class="span8",
             uiOutput("select_fill"),
@@ -46,7 +47,12 @@ iPlot <- function(
         )
       ),
       server = function(input, output, session) {
+        observe({
+          print(input$test)
+          
+        })
         main_data <- reactive({
+          
           num_conditions <- lapply(static$numerics, function(i) {
             static$data[[i]] <= max(rv[[i]]) & static$data[[i]] >= min(rv[[i]])
           })
