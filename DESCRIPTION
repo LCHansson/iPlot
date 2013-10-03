@@ -10,11 +10,10 @@ License: GPLv3
 Depends:
     shiny,
     RJSONIO,
-    ggplot2
+    ggplot2,
+    sparkle
 Collate:
     'app.R'
     'plot.R'
     'utils.R'
     'iData-class.R'
-    'select2.R'
-    'bootstrapselect.R'

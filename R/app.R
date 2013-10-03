@@ -32,13 +32,12 @@ iPlot <- function(
         includeCSS(system.file("css/custom.css", package="iPlot")),
         div(class="row",
           div(class="span2",
-            uiOutput("num_filter"),
-            bootstrapSelect("test")
+            uiOutput("num_filter")
           ),
           div(class="span8",
             uiOutput("select_fill"),
             uiOutput("select_density"),
-            plotOutput("main_plot"), #, height = height, width = width*0.8)
+            plotOutput("main_plot"),
             uiOutput("count")
           ),
           div(class="span2",
@@ -68,17 +67,29 @@ iPlot <- function(
         })
         
         output$select_fill <- renderUI({
-          cats <- get_vars(static$categories, "categorical")
-          nums <- get_vars(static$numerics, "numerical")
+          cats <- static$categories
+          nums <- static$numerics
           vars <- c(cats, nums)
-          select2input("fill", label = "Select fill variable:", choices = vars)
+          subs <- c(
+            rep("categorical", length(cats)),
+            rep("numerical", length(nums))
+          )
+          bootstrapSelectInput(
+            "fill",
+            label = "Select fill variable:",
+            choices = vars,
+            liveSearch = T,
+            subtext = subs
+          )
         })
         
          output$select_density <- renderUI({
-           select2input(
+           bootstrapSelectInput(
              "density",
              label = "Select density variable:",
-             choices = get_vars(static$numerics, "numerical")
+             choices = static$numerics,
+             liveSearch = T,
+             subtext = rep("numerical", length(static$numerics))
             )
          })
         
@@ -100,10 +111,15 @@ iPlot <- function(
         output$cat_filter <- renderUI({
            selector_menu_list <- lapply(static$categories, function(i) {
               tbl <- table(static$data[[i]])
-              choice_lst = names(tbl)
-              names(choice_lst) <- sprintf("%s (%s)", choice_lst, tbl)
               tagList(
-                 select2input(paste0("menu",i), label = i, choices = choice_lst, multiple = TRUE, options = list(placeholder = "select ..."))
+                 bootstrapSelectInput(
+                   paste0("menu", i),
+                   label = i, choices = names(tbl),
+                   multiple = TRUE,
+                   liveSearch = T,
+                   subtext = tbl,
+                   selectedTextFormat = "count"
+                 )
               )
            })
            do.call(tagList, selector_menu_list)
