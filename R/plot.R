@@ -13,11 +13,11 @@ mini_plot <- function(title, subtitle = "", vec, sel) {
    usr <- par('usr')
    if(!is.null(min(sel))) {
       if(!is.null(max(sel))){
-         rect(min(sel), usr[3], max(sel), usr[4], col=rgb(0, 1, 1,0.2), border = NA)
+         rect(min(sel), usr[3], max(sel), usr[4], col=rgb(0, 0, 0, 0.2), border = NA)
       }
    }
    mtext(title, side=3, line=0, adj=0, cex=1, col="black")
-   mtext(min(sel), side=1, line=0, adj=0, cex=1, col="grey")
-   mtext(max(sel), side=1, line=0, adj=1, cex=1, col="grey")
+   mtext(min(sel), side=1, line=0, adj=0, cex=0.8, col="black")
+   mtext(max(sel), side=1, line=0, adj=1, cex=0.8, col="black")
    par(op)
 }
