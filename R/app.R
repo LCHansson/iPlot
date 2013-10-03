@@ -35,12 +35,12 @@ iPlot <- function(
             uiOutput("num_filter")
           ),
           div(class="span8",
-            uiOutput("select_fill"),
-            uiOutput("select_density"),
             plotOutput("main_plot"),
             uiOutput("count")
           ),
           div(class="span2",
+            uiOutput("select_fill"),
+            uiOutput("select_density"),
             uiOutput("cat_filter")
           )
         )
@@ -67,19 +67,13 @@ iPlot <- function(
         })
         
         output$select_fill <- renderUI({
-          cats <- static$categories
-          nums <- static$numerics
-          vars <- c(cats, nums)
-          subs <- c(
-            rep("categorical", length(cats)),
-            rep("numerical", length(nums))
-          )
           bootstrapSelectInput(
             "fill",
             label = "Select fill variable:",
-            choices = vars,
+            choices = static$categories,
             liveSearch = T,
-            subtext = subs
+            subtext = rep("categorical", length(static$categories)),
+            style = "btn-info"
           )
         })
         
@@ -89,7 +83,8 @@ iPlot <- function(
              label = "Select density variable:",
              choices = static$numerics,
              liveSearch = T,
-             subtext = rep("numerical", length(static$numerics))
+             subtext = rep("numerical", length(static$numerics)),
+             style = "btn-info"
             )
          })
         
@@ -114,8 +109,10 @@ iPlot <- function(
               tagList(
                  bootstrapSelectInput(
                    paste0("menu", i),
-                   label = i, choices = names(tbl),
-                   multiple = TRUE,
+                   label = i,
+                   choices = names(tbl),
+                   selected = names(tbl),
+                   multiple = T,
                    liveSearch = T,
                    subtext = tbl,
                    selectedTextFormat = "count"
@@ -136,7 +133,7 @@ iPlot <- function(
         output$main_plot <- renderPlot({
           data <- main_data()
           data[[input$fill]] <- as.factor(data[[input$fill]])
-          p <- ggplot(data, aes_string(x = input$density, fill = input$fill)) + geom + theme_bw()
+          p <- ggplot(data, aes_string(x = input$density, color = input$fill)) + geom + theme_bw()
           print(p)
         })
         
@@ -173,9 +170,3 @@ iPlot <- function(
     )
   , ...)
 }
-
-get_vars <- function(vars, type) {
-  names(vars) <- sprintf("%s (%s)", vars, type)
-  return(vars)
-}
-          
