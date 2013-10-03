@@ -3,7 +3,7 @@
 A visualization app using click events for static plots in [shiny](https://github.com/rstudio/shiny) (since 0.7.0).
 
     library(iPlot)
-    iPlot("Pulse", "Age", MASS::survey, c("Pulse", "Age", "Height", "NW.Hnd", "Wr.Hnd"))
+    iPlot(ggplot2::diamonds)
 
 ![iPlot](https://dl.dropboxusercontent.com/u/2904328/iPlot.png)
 
