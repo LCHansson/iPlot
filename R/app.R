@@ -130,13 +130,6 @@ iPlot <- function(
           )
         })
         
-#         output$main_plot <- renderPlot({
-#           data <- main_data()
-#           data[[input$fill]] <- as.factor(data[[input$fill]])
-#           p <- ggplot(data, aes_string(x = input$density, color = input$fill)) + geom + theme_bw()
-#           print(p)
-#         })
-        
         output$main_plot <- renderChart({
           require(data.table)
           data <- main_data()
