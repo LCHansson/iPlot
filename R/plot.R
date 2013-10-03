@@ -8,7 +8,6 @@
 mini_plot <- function(title, subtitle = "", vec, sel) {
    op <- par(mar = c(2, 0, 1, 0))
    plot(density(vec), xlab = "", ylab = "", axes=F, xaxt="n", yaxt="n", main=" ", cex.axis=0.8)
-   #abline(v = sel)
    abline(h = max(density(vec)$y)/2, lty="dashed")
    usr <- par('usr')
    if(!is.null(min(sel))) {

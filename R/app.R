@@ -35,7 +35,7 @@ iPlot <- function(
             uiOutput("num_filter")
           ),
           div(class="span8",
-            plotOutput("main_plot"),
+            chartOutput("main_plot", "highcharts"),
             uiOutput("count")
           ),
           div(class="span2",
@@ -130,11 +130,30 @@ iPlot <- function(
           )
         })
         
-        output$main_plot <- renderPlot({
+#         output$main_plot <- renderPlot({
+#           data <- main_data()
+#           data[[input$fill]] <- as.factor(data[[input$fill]])
+#           p <- ggplot(data, aes_string(x = input$density, color = input$fill)) + geom + theme_bw()
+#           print(p)
+#         })
+        
+        output$main_plot <- renderChart({
+          require(data.table)
           data <- main_data()
-          data[[input$fill]] <- as.factor(data[[input$fill]])
-          p <- ggplot(data, aes_string(x = input$density, color = input$fill)) + geom + theme_bw()
-          print(p)
+          data <- rbindlist(lapply(unique(data[[input$fill]]), 
+            function(i) {
+              d <- data[data[[input$fill]] == i, ][[input$density]]
+              if (length(d) > 1) {
+                data.table(x = density(d)$x, y = density(d)$y, i = i)
+              } else NULL
+            }
+          ))
+          p <- hPlot(x = "x", y = "y", data = data, type = "line", group = "i", radius = 1)
+          p$xAxis(title = list(enabled = F), lineWidth = 0, minorTickLength = 0, tickLength = 0)
+          p$yAxis(title = list(enabled = F), labels = list(enabled = F), lineWidth = 0, gridLineWidth = 0, minorTickLength = 0, tickLength = 0)
+          p$legend(borderWidth = 0, verticalAlign = "top")
+          p$addParams(dom = 'main_plot')
+          return(p)
         })
         
         rv <- reactiveValues()
