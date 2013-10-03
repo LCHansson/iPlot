@@ -159,7 +159,7 @@ iPlot <- function(
             output[[paste0("plot", i)]] <- renderPlot({
               mini_plot(
                 i,
-                paste(format(rv[[i]], digits = 3), collapse = "-"),
+                paste(format(rv[[i]], digits = 3), collapse = " - "),
                 static$data[[i]],
                 rv[[i]]
               )
