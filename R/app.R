@@ -24,7 +24,11 @@ iPlot <- function(
   ...
 ){
   
-  static <- iData(data)
+  if(class(data) != "iData") {
+    static <- iData(data) 
+  } else {
+    static <- copy(data)
+  }
   
   # Run app
   runApp(
