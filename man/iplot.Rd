@@ -3,7 +3,8 @@
 \title{Interactive Plot}
 \usage{
   iPlot(data, height = 600, width = 800,
-    geom = geom_density(alpha = 0.3), ...)
+    geom = geom_density(alpha = 0.3), liveSearchLimit = 7,
+    ...)
 }
 \arguments{
   \item{data}{dataset}

@@ -20,6 +20,7 @@ iPlot <- function(
   height = 600,
   width = 800,
   geom = geom_density(alpha = .3),
+  liveSearchLimit = 7,
   ...
 ){
   
@@ -67,22 +68,24 @@ iPlot <- function(
         })
         
         output$select_fill <- renderUI({
+          liveSearch <- if (length(static$categories) >= liveSearchLimit) T else F
           bootstrapSelectInput(
             "fill",
             label = "Select fill variable:",
             choices = static$categories,
-            liveSearch = T,
+            liveSearch = liveSearch,
             subtext = rep("categorical", length(static$categories)),
             style = "btn-info"
           )
         })
         
          output$select_density <- renderUI({
+           liveSearch <- if (length(static$numerics) >= liveSearchLimit) T else F
            bootstrapSelectInput(
              "density",
              label = "Select density variable:",
              choices = static$numerics,
-             liveSearch = T,
+             liveSearch = liveSearch,
              subtext = rep("numerical", length(static$numerics)),
              style = "btn-info"
             )
@@ -106,6 +109,7 @@ iPlot <- function(
         output$cat_filter <- renderUI({
            selector_menu_list <- lapply(static$categories, function(i) {
               tbl <- table(static$data[[i]])
+              liveSearch <- if (length(tbl) >= liveSearchLimit) T else F
               tagList(
                  bootstrapSelectInput(
                    paste0("menu", i),
@@ -113,7 +117,7 @@ iPlot <- function(
                    choices = names(tbl),
                    selected = names(tbl),
                    multiple = T,
-                   liveSearch = T,
+                   liveSearch = liveSearch,
                    subtext = tbl,
                    selectedTextFormat = "count"
                  )
