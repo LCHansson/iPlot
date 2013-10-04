@@ -72,27 +72,29 @@ iPlot <- function(
         })
         
         output$select_fill <- renderUI({
-          liveSearch <- if (length(static$categories) >= liveSearchLimit) T else F
-          bootstrapSelectInput(
+          multiselectInput(
             "fill",
             label = "Select fill variable:",
             choices = static$categories,
-            liveSearch = liveSearch,
-            subtext = rep("categorical", length(static$categories)),
-            style = "btn-info"
+            options = list(
+              buttonClass = "btn btn-link",
+              includeSelectAllOption = T,
+              enableFiltering = T
+            )
           )
         })
         
          output$select_density <- renderUI({
-           liveSearch <- if (length(static$numerics) >= liveSearchLimit) T else F
-           bootstrapSelectInput(
+           multiselectInput(
              "density",
              label = "Select density variable:",
              choices = static$numerics,
-             liveSearch = liveSearch,
-             subtext = rep("numerical", length(static$numerics)),
-             style = "btn-info"
+             options = list(
+              buttonClass = "btn btn-link",
+              includeSelectAllOption = T,
+              enableFiltering = T
             )
+          )
          })
         
         output$num_filter <- renderUI({
@@ -113,17 +115,18 @@ iPlot <- function(
         output$cat_filter <- renderUI({
            selector_menu_list <- lapply(static$categories, function(i) {
               tbl <- table(static$data[[i]])
-              liveSearch <- if (length(tbl) >= liveSearchLimit) T else F
               tagList(
-                 bootstrapSelectInput(
+                 multiselectInput(
                    paste0("menu", i),
                    label = i,
                    choices = names(tbl),
                    selected = names(tbl),
                    multiple = T,
-                   liveSearch = liveSearch,
-                   subtext = tbl,
-                   selectedTextFormat = "count"
+                   options = list(
+                    buttonClass = "btn btn-link",
+                    includeSelectAllOption = T,
+                    enableFiltering = T
+                  )
                  )
               )
            })
