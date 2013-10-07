@@ -16,7 +16,7 @@
 #' }
 #' @export
 iPlot <- function(
-  data,
+  data = ggplot2::diamonds,
   height = 600,
   width = 800,
   geom = geom_density(alpha = .3),
@@ -38,13 +38,25 @@ iPlot <- function(
       
       ## UI --------------------------------------------------------------------
       ui = bootstrapPage(
-        includeCSS(system.file("css/custom.css", package="iPlot")),
+#         includeCSS(system.file("css/custom.css", package="iPlot")),
+        includeCSS("inst/css/custom.css"),
         div(
           class="row",
+          
+          #### Numeric (graphic) filters ####
           div(
             class="span2",
-            uiOutput("num_filter")
+            div(
+              class="row",
+              uiOutput("select_filters")
+            ),
+            div(
+              class="row",
+              uiOutput("filters")
+            )
           ),
+          
+          #### Graph window ####
           div(
             class="span8",
             div(
@@ -55,11 +67,20 @@ iPlot <- function(
               class="row",
               plotOutput("main_plot")
             ),
+            
+            #### Table/numeric window ####
             div(
               class="row",
+              uiOutput("select_analysis"),
               uiOutput("count")
+            ),
+            div(
+              class="row",
+              htmlOutput("analysis")
             )
           ),
+          
+          #### Discrete (text) filters ####
           div(
             class="span2",
             uiOutput("select_fill"),
@@ -75,10 +96,11 @@ iPlot <- function(
           print(input$test)
           
         })
+        
+        
+        #### Reactive internals ####
+        
         main_data <- reactive({
-          
-          
-          #### Filter conditions ####
           
           num_conditions <- lapply(static$numerics, function(i) {
             static$data[[i]] <= max(rv[[i]]) & static$data[[i]] >= min(rv[[i]])
@@ -96,21 +118,21 @@ iPlot <- function(
         
         
         #### Reactive UI components (in order or appearance in the UI code) ####
+
+        output$select_filters <- renderUI({
+          multiselectInput(
+            "filter_sel",
+            label = "Choose filters:",
+            choices = c(static$numerics,static$categories),
+            options = list(
+              buttonClass = "btn btn-link btn-core",
+              includeSelectAllOption = T,
+              enableFiltering = T
+            )
+          )
+        })
         
-#         output$select_fill <- renderUI({
-#           multiselectInput(
-#             "fill",
-#             label = "Select fill variable:",
-#             choices = static$categories,
-#             options = list(
-#               buttonClass = "btn btn-link",
-#               includeSelectAllOption = T,
-#               enableFiltering = T
-#             )
-#           )
-#         })
-        
-        output$num_filter <- renderUI({
+        output$filters <- renderUI({
           plot_output_list <- lapply(static$numerics, function(i) {
             tagList(
               plotOutput(
@@ -125,6 +147,9 @@ iPlot <- function(
           do.call(tagList, plot_output_list)
         })
         
+        
+        # Top graph menu (this is where a lot of the conditional magic happens)
+        
         output$select_method <- renderUI({
           tagList(
             div(
@@ -137,7 +162,7 @@ iPlot <- function(
                   Regression = "regr"
                 ),
                 options = list(
-                  buttonClass = "btn btn-link",
+                  buttonClass = "btn btn-link btn-core",
                   includeSelectAllOption = F,
                   enableFiltering = F
                 )
@@ -210,19 +235,6 @@ iPlot <- function(
           )
         })
         
-#         output$select_density <- renderUI({
-#           multiselectInput(
-#             "density",
-#             label = "Select density variable:",
-#             choices = static$numerics,
-#             options = list(
-#               buttonClass = "btn btn-link",
-#               includeSelectAllOption = T,
-#               enableFiltering = T
-#             )
-#           )
-#         })
-
         output$cat_filter <- renderUI({
           selector_menu_list <- lapply(static$categories, function(i) {
             tbl <- table(static$data[[i]])
@@ -267,9 +279,35 @@ iPlot <- function(
           
           if(input$method == "regr") {
             p <- ggplot(data,aes_string(x = input$indepvar, y = input$depvar, color = input$fill)) + geom_point(alpha=.3) + ggthemes::theme_tufte()
+            p <- p + geom_smooth(method = "lm", se=FALSE, linetype = 2, size = 1, color = "#5bc0de")
             print(p)
           }
           
+        })
+        
+        output$select_analysis <- renderUI({
+          tagList(
+            div(
+              class="span2",
+              multiselectInput(
+                "table",
+                label = "Tables and measures:",
+                choices = c(
+                  Variables = "comp_table",
+                  Regression = "regr_table"
+                ),
+                options = list(
+                  buttonClass = "btn btn-link",
+                  includeSelectAllOption = F,
+                  enableFiltering = F
+                )
+              )
+            )
+          )
+        })
+        
+        output$analysis <- renderUI({
+          NULL
         })
         
         ## Thomas: PLEASE add inline documentation of the following code!
