@@ -84,8 +84,8 @@ iPlot <- function(
           div(
             class="span2",
             uiOutput("select_fill"),
-            uiOutput("select_density"),
-            uiOutput("cat_filter")
+            uiOutput("select_density")
+#             uiOutput("cat_filter")
           )
         )
       ),
@@ -124,6 +124,8 @@ iPlot <- function(
             "filter_sel",
             label = "Choose filters:",
             choices = c(static$numerics,static$categories),
+            selected = c(static$numerics,static$categories),
+            multiple = T,
             options = list(
               buttonClass = "btn btn-link btn-core",
               includeSelectAllOption = T,
@@ -297,7 +299,7 @@ iPlot <- function(
                   Regression = "regr_table"
                 ),
                 options = list(
-                  buttonClass = "btn btn-link",
+                  buttonClass = "btn btn-link btn-core",
                   includeSelectAllOption = F,
                   enableFiltering = F
                 )
