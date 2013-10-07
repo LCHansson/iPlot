@@ -33,6 +33,8 @@ iPlot <- function(
   # Run app
   runApp(
     list(
+      
+      ## UI --------------------------------------------------------------------
       ui = bootstrapPage(
         includeCSS(system.file("css/custom.css", package="iPlot")),
         div(class="row",
@@ -50,12 +52,17 @@ iPlot <- function(
           )
         )
       ),
+      
+      ## SERVER ----------------------------------------------------------------
       server = function(input, output, session) {
         observe({
           print(input$test)
           
         })
         main_data <- reactive({
+          
+          
+          #### Filter conditions ####
           
           num_conditions <- lapply(static$numerics, function(i) {
             static$data[[i]] <= max(rv[[i]]) & static$data[[i]] >= min(rv[[i]])
@@ -83,6 +90,9 @@ iPlot <- function(
             )
           )
         })
+        
+        
+        #### Reactive UI components ####
         
          output$select_density <- renderUI({
            multiselectInput(
@@ -132,6 +142,9 @@ iPlot <- function(
            })
            do.call(tagList, selector_menu_list)
         })
+        
+        
+        #### UI-static reactive components ####
         
         output$count <- renderText({
           sprintf("Selected %s out of %s, whereas %s deleted because of missing values.",
