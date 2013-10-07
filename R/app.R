@@ -30,6 +30,8 @@ iPlot <- function(
     static <- copy(data)
   }
   
+  graphTypes = c("density", "scatter")
+  
   # Run app
   runApp(
     list(
@@ -37,15 +39,29 @@ iPlot <- function(
       ## UI --------------------------------------------------------------------
       ui = bootstrapPage(
         includeCSS(system.file("css/custom.css", package="iPlot")),
-        div(class="row",
-          div(class="span2",
+        div(
+          class="row",
+          div(
+            class="span2",
             uiOutput("num_filter")
           ),
-          div(class="span8",
-            plotOutput("main_plot"),
-            uiOutput("count")
+          div(
+            class="span8",
+            div(
+              class="row",
+              uiOutput("select_method")
+            ),
+            div(
+              class="row",
+              plotOutput("main_plot")
+            ),
+            div(
+              class="row",
+              uiOutput("count")
+            )
           ),
-          div(class="span2",
+          div(
+            class="span2",
             uiOutput("select_fill"),
             uiOutput("select_density"),
             uiOutput("cat_filter")
@@ -69,43 +85,30 @@ iPlot <- function(
           })
           
           cat_conditions <- lapply(static$categories, function(i) {
-              if(length(input[[paste0("menu", i)]]) > 0) {
-                 static$data[[i]] %in% input[[paste0("menu", i)]]
-              } else {
-                 TRUE
-              }
-           })
+            if(length(input[[paste0("menu", i)]]) > 0) {
+              static$data[[i]] %in% input[[paste0("menu", i)]]
+            } else {
+              TRUE
+            }
+          })
           static$data[Reduce("&", c(num_conditions, cat_conditions)), ]
         })
         
-        output$select_fill <- renderUI({
-          multiselectInput(
-            "fill",
-            label = "Select fill variable:",
-            choices = static$categories,
-            options = list(
-              buttonClass = "btn btn-link",
-              includeSelectAllOption = T,
-              enableFiltering = T
-            )
-          )
-        })
         
+        #### Reactive UI components (in order or appearance in the UI code) ####
         
-        #### Reactive UI components ####
-        
-         output$select_density <- renderUI({
-           multiselectInput(
-             "density",
-             label = "Select density variable:",
-             choices = static$numerics,
-             options = list(
-              buttonClass = "btn btn-link",
-              includeSelectAllOption = T,
-              enableFiltering = T
-            )
-          )
-         })
+#         output$select_fill <- renderUI({
+#           multiselectInput(
+#             "fill",
+#             label = "Select fill variable:",
+#             choices = static$categories,
+#             options = list(
+#               buttonClass = "btn btn-link",
+#               includeSelectAllOption = T,
+#               enableFiltering = T
+#             )
+#           )
+#         })
         
         output$num_filter <- renderUI({
           plot_output_list <- lapply(static$numerics, function(i) {
@@ -122,25 +125,123 @@ iPlot <- function(
           do.call(tagList, plot_output_list)
         })
         
-        output$cat_filter <- renderUI({
-           selector_menu_list <- lapply(static$categories, function(i) {
-              tbl <- table(static$data[[i]])
-              tagList(
-                 multiselectInput(
-                   paste0("menu", i),
-                   label = i,
-                   choices = names(tbl),
-                   selected = names(tbl),
-                   multiple = T,
-                   options = list(
+        output$select_method <- renderUI({
+          tagList(
+            div(
+              class="span2",
+              multiselectInput(
+                "method",
+                label = "Analysis method:",
+                choices = c(
+                  Composition = "comp",
+                  Regression = "regr"
+                ),
+                options = list(
+                  buttonClass = "btn btn-link",
+                  includeSelectAllOption = F,
+                  enableFiltering = F
+                )
+              )
+            ),
+            conditionalPanel(
+              "input.method == 'comp' | input.method == 'regr'",
+              div(
+                class="span2",
+                multiselectInput(
+                  "fill",
+                  label = "Select fill variable:",
+                  choices = static$categories,
+                  options = list(
                     buttonClass = "btn btn-link",
                     includeSelectAllOption = T,
                     enableFiltering = T
                   )
-                 )
+                )
               )
-           })
-           do.call(tagList, selector_menu_list)
+            ),
+            conditionalPanel(
+              "input.method == 'comp'",
+              div(
+                class="span2",
+                multiselectInput(
+                  "density",
+                  label = "Select density variable:",
+                  choices = static$numerics,
+                  options = list(
+                    buttonClass = "btn btn-link",
+                    includeSelectAllOption = T,
+                    enableFiltering = T
+                  )
+                )
+              )
+            ),
+            conditionalPanel(
+              "input.method == 'regr'",
+              div(
+                class="span2",
+                multiselectInput(
+                  "indepvar",
+                  label = "X axis (independent)",
+                  choices = c(static$numerics,static$categories),
+                  options = list(
+                    buttonClass = "btn btn-link",
+                    includeSelectAllOption = T,
+                    enableFiltering = T
+                  )
+                )
+              )
+            ),
+            conditionalPanel(
+              "input.method == 'regr'",
+              div(
+                class="span2",
+                multiselectInput(
+                  "depvar",
+                  label = "Y axis (dependent)",
+                  choices = c(static$numerics,static$categories),
+                  options = list(
+                    buttonClass = "btn btn-link",
+                    includeSelectAllOption = T,
+                    enableFiltering = T
+                  )
+                )
+              )
+            )
+          )
+        })
+        
+#         output$select_density <- renderUI({
+#           multiselectInput(
+#             "density",
+#             label = "Select density variable:",
+#             choices = static$numerics,
+#             options = list(
+#               buttonClass = "btn btn-link",
+#               includeSelectAllOption = T,
+#               enableFiltering = T
+#             )
+#           )
+#         })
+
+        output$cat_filter <- renderUI({
+          selector_menu_list <- lapply(static$categories, function(i) {
+            tbl <- table(static$data[[i]])
+            tagList(
+              multiselectInput(
+                paste0("menu", i),
+                label = i,
+                choices = names(tbl),
+                selected = names(tbl),
+                multiple = T,
+                options = list(
+                  buttonClass = "btn btn-link",
+                  includeSelectAllOption = T,
+                  enableFiltering = T
+                )
+              )
+            )
+          })
+          do.call(tagList, selector_menu_list)
         })
         
         
@@ -148,26 +249,37 @@ iPlot <- function(
         
         output$count <- renderText({
           sprintf("Selected %s out of %s, whereas %s deleted because of missing values.",
-            nrow(main_data()),
-            nrow(static$data),
-            static$removed_na
+                  nrow(main_data()),
+                  nrow(static$data),
+                  static$removed_na
           )
         })
         
         output$main_plot <- renderPlot({
           data <- main_data()
           data[[input$fill]] <- as.factor(data[[input$fill]])
-          p <- ggplot(data, aes_string(x = input$density, fill = input$fill)) + geom + ggthemes::theme_tufte()
-          print(p)
+          
+          
+          if(input$method == "comp") {
+            p <- ggplot(data, aes_string(x = input$density, fill = input$fill)) + geom + ggthemes::theme_tufte()
+            print(p)
+          }
+          
+          if(input$method == "regr") {
+            p <- ggplot(data,aes_string(x = input$indepvar, y = input$depvar, color = input$fill)) + geom_point(alpha=.3) + ggthemes::theme_tufte()
+            print(p)
+          }
+          
         })
         
+        ## Thomas: PLEASE add inline documentation of the following code!
         rv <- reactiveValues()
         for (var in static$numerics) {
-      
+          
           local({
             i <- var
             rv[[i]] <- c(min(static$data[[i]], na.rm = T), max(static$data[[i]], na.rm = T))
-              
+            
             observe({
               rv[[i]] <- setInput(
                 rv[[i]],
@@ -192,5 +304,5 @@ iPlot <- function(
         }
       }
     )
-  , ...)
+    , ...)
 }
