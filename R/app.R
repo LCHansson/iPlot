@@ -53,6 +53,7 @@ iPlot <- function(
             div(
               class="row",
               uiOutput("filters"),
+              tags$hr(),
               uiOutput("cat_filter")
             )
           ),
@@ -66,7 +67,8 @@ iPlot <- function(
             ),
             div(
               class="row",
-              plotOutput("main_plot")
+              plotOutput("main_plot"),
+              tags$hr()
             ),
             
             #### Table/numeric window ####
@@ -79,14 +81,6 @@ iPlot <- function(
               class="row",
               htmlOutput("analysis")
             )
-          ),
-          
-          #### Discrete (text) filters ####
-          div(
-            class="span2",
-            uiOutput("select_fill"),
-            uiOutput("select_density")
-#             uiOutput("cat_filter")
           )
         )
       ),
@@ -125,7 +119,7 @@ iPlot <- function(
             "filter_sel",
             label = "Choose filters:",
             choices = c(static$numerics,static$categories),
-            selected = c(static$numerics[1],static$categories[1]),
+            selected = c(static$numerics[1:2],static$categories[1:2]),
             multiple = T,
             options = list(
               buttonClass = "btn btn-link btn-core",
@@ -133,6 +127,29 @@ iPlot <- function(
               enableFiltering = T
             )
           )
+        })
+        
+        output$cat_filter <- renderUI({
+          cat_vars <- static$categories[static$categories %in% input$filter_sel]
+          
+          selector_menu_list <- lapply(cat_vars, function(i) {
+            tbl <- table(static$data[[i]])
+            tagList(
+              multiselectInput(
+                paste0("menu", i),
+                label = i,
+                choices = names(tbl),
+                selected = names(tbl),
+                multiple = T,
+                options = list(
+                  buttonClass = "btn btn-link",
+                  includeSelectAllOption = T,
+                  enableFiltering = T
+                )
+              )
+            )
+          })
+          do.call(tagList, selector_menu_list)
         })
         
         output$filters <- renderUI({
@@ -180,7 +197,7 @@ iPlot <- function(
                 multiselectInput(
                   "fill",
                   label = "Select fill variable:",
-                  choices = static$categories,
+                  choices = c("None",static$categories),
                   options = list(
                     buttonClass = "btn btn-link",
                     includeSelectAllOption = T,
@@ -239,30 +256,7 @@ iPlot <- function(
             )
           )
         })
-        
-        output$cat_filter <- renderUI({
-          cat_vars <- static$categories[static$categories %in% input$filter_sel]
-          
-          selector_menu_list <- lapply(cat_vars, function(i) {
-            tbl <- table(static$data[[i]])
-            tagList(
-              multiselectInput(
-                paste0("menu", i),
-                label = i,
-                choices = names(tbl),
-                selected = names(tbl),
-                multiple = T,
-                options = list(
-                  buttonClass = "btn btn-link",
-                  includeSelectAllOption = T,
-                  enableFiltering = T
-                )
-              )
-            )
-          })
-          do.call(tagList, selector_menu_list)
-        })
-        
+
         
         #### UI-static reactive components ####
         
@@ -276,16 +270,17 @@ iPlot <- function(
         
         output$main_plot <- renderPlot({
           data <- main_data()
-          data[[input$fill]] <- as.factor(data[[input$fill]])
-          
+          if(input$fill != "None") {
+            data[[input$fill]] <- as.factor(data[[input$fill]])
+          }          
           
           if(input$method == "comp") {
-            p <- ggplot(data, aes_string(x = input$density, fill = input$fill)) + geom + ggthemes::theme_tufte()
+            p <- ggplot(data, aes_string(x = input$density, fill = ifelse(input$fill != "None", input$fill, 1))) + geom + ggthemes::theme_tufte()
             print(p)
           }
           
           if(input$method == "regr") {
-            p <- ggplot(data,aes_string(x = input$indepvar, y = input$depvar, color = input$fill)) + geom_point(alpha=.3) + ggthemes::theme_tufte()
+            p <- ggplot(data,aes_string(x = input$indepvar, y = input$depvar, color = ifelse(input$fill != "None", input$fill, 1))) + geom_point(alpha=.3) + ggthemes::theme_tufte()
             p <- p + geom_smooth(method = "lm", se=FALSE, linetype = 2, size = 1, color = "#5bc0de")
             print(p)
           }
