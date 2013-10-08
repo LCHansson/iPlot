@@ -52,7 +52,8 @@ iPlot <- function(
             ),
             div(
               class="row",
-              uiOutput("filters")
+              uiOutput("filters"),
+              uiOutput("cat_filter")
             )
           ),
           
@@ -124,7 +125,7 @@ iPlot <- function(
             "filter_sel",
             label = "Choose filters:",
             choices = c(static$numerics,static$categories),
-            selected = c(static$numerics,static$categories),
+            selected = c(static$numerics[1],static$categories[1]),
             multiple = T,
             options = list(
               buttonClass = "btn btn-link btn-core",
@@ -135,7 +136,9 @@ iPlot <- function(
         })
         
         output$filters <- renderUI({
-          plot_output_list <- lapply(static$numerics, function(i) {
+          plot_vars <- static$numerics[static$numerics %in% input$filter_sel]
+          
+          plot_output_list <- lapply(plot_vars, function(i) {
             tagList(
               plotOutput(
                 paste0("plot", i),
@@ -238,7 +241,9 @@ iPlot <- function(
         })
         
         output$cat_filter <- renderUI({
-          selector_menu_list <- lapply(static$categories, function(i) {
+          cat_vars <- static$categories[static$categories %in% input$filter_sel]
+          
+          selector_menu_list <- lapply(cat_vars, function(i) {
             tbl <- table(static$data[[i]])
             tagList(
               multiselectInput(
