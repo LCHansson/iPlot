@@ -79,7 +79,7 @@ iPlot <- function(
             ),
             div(
               class="row",
-              htmlOutput("analysis")
+              uiOutput("analysis")
             )
           )
         )
@@ -230,6 +230,7 @@ iPlot <- function(
                   "indepvar",
                   label = "X axis (independent)",
                   choices = c(static$numerics,static$categories),
+                  selected = c(static$numerics,static$categories)[1],
                   options = list(
                     buttonClass = "btn btn-link",
                     includeSelectAllOption = T,
@@ -246,6 +247,7 @@ iPlot <- function(
                   "depvar",
                   label = "Y axis (dependent)",
                   choices = c(static$numerics,static$categories),
+                  selected = c(static$numerics,static$categories)[2],
                   options = list(
                     buttonClass = "btn btn-link",
                     includeSelectAllOption = T,
@@ -268,7 +270,11 @@ iPlot <- function(
           )
         })
         
+        #### GRAPH focus area ####
+        
         output$main_plot <- renderPlot({
+#           if(!exists("input$fill")) return()
+          
           data <- main_data()
           if(input$fill != "None") {
             data[[input$fill]] <- as.factor(data[[input$fill]])
@@ -287,21 +293,42 @@ iPlot <- function(
           
         })
         
+        
+        #### TABLE focus area ####
+        
         output$select_analysis <- renderUI({
           tagList(
             div(
               class="span2",
               multiselectInput(
-                "table",
+                "text_sel",
                 label = "Tables and measures:",
                 choices = c(
-                  Variables = "comp_table",
+                  Variables = "data_view",
                   Regression = "regr_table"
                 ),
+                selected = "Variables",
                 options = list(
                   buttonClass = "btn btn-link btn-core",
                   includeSelectAllOption = F,
                   enableFiltering = F
+                )
+              )
+            ),
+            conditionalPanel(
+              "input.text_sel == 'data_view'",
+              div(
+                class="span2",
+                multiselectInput(
+                  "view_vars",
+                  label = "List variables",
+                  choices = c(static$numerics,static$categories),
+                  selected = c(static$numerics,static$categories)[1:2],
+                  options = list(
+                    buttonClass = "btn btn-link",
+                    includeSelectAllOption = T,
+                    enableFiltering = T
+                  )
                 )
               )
             )
@@ -309,8 +336,31 @@ iPlot <- function(
         })
         
         output$analysis <- renderUI({
-          NULL
+          
+          textOutput(input$text_sel)
+          
         })
+
+        output$data_view <- renderText({
+          input$view_vars
+
+        })
+        
+        #### Regression model functions ####
+        make_model <- function(model_type, formula, ...) {
+          # The code for this function is recycled from the following Shiny Showcase example:
+          # https://gist.github.com/wch/4034323
+          # http://glimmer.rstudio.com/winston/heightweight/
+          
+          # Get the subset of the data limited by the specified range
+          hw_sub <- limit_data_range()
+          if (is.null(hw_sub))
+            return()
+          
+          # In order to get the output to print the formula in a nice way, we'll
+          # use do.call here with some quoting.
+          do.call(model_type, args = list(formula = formula, data = quote(hw_sub), ...))
+        }
         
         ## Thomas: PLEASE add inline documentation of the following code!
         rv <- reactiveValues()
