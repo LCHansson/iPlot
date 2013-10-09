@@ -43,7 +43,7 @@ iPlot <- function(
         div(
           class="row",
           
-          #### Numeric (graphic) filters ####
+          #### Filters focus area ####
           div(
             class="span2",
             div(
@@ -58,7 +58,7 @@ iPlot <- function(
             )
           ),
           
-          #### Graph window ####
+          #### Graph focus area ####
           div(
             class="span8",
             div(
@@ -71,15 +71,23 @@ iPlot <- function(
               tags$hr()
             ),
             
-            #### Table/numeric window ####
+            #### Table/numeric focus area ####
             div(
               class="row",
-              uiOutput("select_analysis"),
-              uiOutput("count")
+              uiOutput("select_analysis")
             ),
             div(
               class="row",
               uiOutput("analysis")
+            )
+          ),
+          
+          #### Right column focus area ####
+          div(
+            class="span2",
+            div(
+              class="row",
+              uiOutput("buttons")
             )
           )
         )
@@ -260,16 +268,6 @@ iPlot <- function(
         })
 
         
-        #### UI-static reactive components ####
-        
-        output$count <- renderText({
-          sprintf("Selected %s out of %s, whereas %s deleted because of missing values.",
-                  nrow(main_data()),
-                  nrow(static$data),
-                  static$removed_na
-          )
-        })
-        
         #### GRAPH focus area ####
         
         output$main_plot <- renderPlot({
@@ -324,6 +322,7 @@ iPlot <- function(
                   label = "List variables",
                   choices = c(static$numerics,static$categories),
                   selected = c(static$numerics,static$categories)[1:2],
+                  multiple = T,
                   options = list(
                     buttonClass = "btn btn-link",
                     includeSelectAllOption = T,
@@ -335,15 +334,22 @@ iPlot <- function(
           )
         })
         
+        output$count <- renderText({
+          sprintf("Selected %s out of %s, whereas %s deleted because of missing values.",
+                  nrow(main_data()),
+                  nrow(static$data),
+                  static$removed_na
+          )
+        })
+        
+        
+        
         output$analysis <- renderUI({
-          
-          textOutput(input$text_sel)
-          
+          uiOutput("count")
         })
 
         output$data_view <- renderText({
           input$view_vars
-
         })
         
         #### Regression model functions ####
@@ -364,6 +370,7 @@ iPlot <- function(
         
         ## Thomas: PLEASE add inline documentation of the following code!
         rv <- reactiveValues()
+        
         for (var in static$numerics) {
           
           local({
@@ -392,6 +399,16 @@ iPlot <- function(
             })
           })
         }
+        
+        #### RIGHT COLUMN focus area ####
+        output$buttons <- renderUI({
+          tagList(
+            downloadButton("dlData","Download data"),
+            downloadButton("dlGraph","Save graph"),
+            actionButton("options", "Advanced settings"),
+            actionButton("quit","Quit iPlot")
+          )
+        })
       }
     )
     , ...)
