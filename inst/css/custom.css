@@ -48,3 +48,10 @@ td
   margin-bottom: 10px;
   font-weight: bold;
 }
+
+.list-inline {
+  list-style: none;
+  display: inline-block;
+  padding-right: 5px;
+  padding-left: 5px;
+}

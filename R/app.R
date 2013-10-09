@@ -39,7 +39,6 @@ iPlot <- function(
       ## UI --------------------------------------------------------------------
       ui = bootstrapPage(
 #         includeCSS(system.file("css/custom.css", package="iPlot")),
-        includeCSS("inst/css/bootstrap.css"),
         includeCSS("inst/css/custom.css"),
         div(
           class="row",
