@@ -39,6 +39,7 @@ iPlot <- function(
       ## UI --------------------------------------------------------------------
       ui = bootstrapPage(
 #         includeCSS(system.file("css/custom.css", package="iPlot")),
+        includeCSS("inst/css/bootstrap.css"),
         includeCSS("inst/css/custom.css"),
         div(
           class="row",
@@ -120,7 +121,7 @@ iPlot <- function(
         })
         
         
-        #### Reactive UI components (in order or appearance in the UI code) ####
+        #### FILTERS focus area ####
 
         output$select_filters <- renderUI({
           multiselectInput(
@@ -178,7 +179,7 @@ iPlot <- function(
         })
         
         
-        # Top graph menu (this is where a lot of the conditional magic happens)
+        #### GRAPH focus area ####
         
         output$select_method <- renderUI({
           tagList(
@@ -267,11 +268,7 @@ iPlot <- function(
           )
         })
 
-        
-        #### GRAPH focus area ####
-        
         output$main_plot <- renderPlot({
-#           if(!exists("input$fill")) return()
           
           data <- main_data()
           if(input$fill != "None") {
@@ -279,13 +276,19 @@ iPlot <- function(
           }          
           
           if(input$method == "comp") {
-            p <- ggplot(data, aes_string(x = input$density, fill = ifelse(input$fill != "None", input$fill, 1))) + geom + ggthemes::theme_tufte()
+            p <- ggplot(data, aes_string(x = input$density, fill = ifelse(input$fill != "None", input$fill, 1))) + 
+              geom + 
+              ggthemes::theme_tufte()
+            
             print(p)
           }
           
           if(input$method == "regr") {
-            p <- ggplot(data,aes_string(x = input$indepvar, y = input$depvar, color = ifelse(input$fill != "None", input$fill, 1))) + geom_point(alpha=.3) + ggthemes::theme_tufte()
+            p <- ggplot(data,aes_string(x = input$indepvar, y = input$depvar, color = ifelse(input$fill != "None", input$fill, 1))) +
+              geom_point(alpha=.3) +
+              ggthemes::theme_tufte()
             p <- p + geom_smooth(method = "lm", se=FALSE, linetype = 2, size = 1, color = "#5bc0de")
+            
             print(p)
           }
           
@@ -333,6 +336,33 @@ iPlot <- function(
             )
           )
         })
+
+        output$analysis <- renderUI({
+          uiOutput(outputId = input$text_sel)
+        })
+
+        output$data_view <- renderUI({
+          data <- main_data()
+          
+          list_conditions <- lapply(input$view_vars, function(i) {
+            tags$ul(
+              class="list-inline",
+              tags$li(i),
+              tags$li(format(mean(data[[i]]),digits=2)),
+              tags$li(format(sd(data[[i]]),digits=2)),
+              tags$li(format(quantile(data[[i]],0.05),digits=2)),
+              tags$li(format(quantile(data[[i]],0.25),digits=2)),
+              tags$li(format(quantile(data[[i]],0.75),digits=2)),
+              tags$li(format(quantile(data[[i]],0.95),digits=2))
+            )
+          })
+          
+          do.call(tagList, list_conditions)
+          
+#           tagList(
+#             uiOutput("count")
+#           )
+        })
         
         output$count <- renderText({
           sprintf("Selected %s out of %s, whereas %s deleted because of missing values.",
@@ -340,16 +370,6 @@ iPlot <- function(
                   nrow(static$data),
                   static$removed_na
           )
-        })
-        
-        
-        
-        output$analysis <- renderUI({
-          uiOutput("count")
-        })
-
-        output$data_view <- renderText({
-          input$view_vars
         })
         
         #### Regression model functions ####
