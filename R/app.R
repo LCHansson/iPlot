@@ -337,7 +337,10 @@ iPlot <- function(
         })
 
         output$analysis <- renderUI({
-          uiOutput(outputId = input$text_sel)
+          tagList(
+            div(class="span8",uiOutput("count")),
+            uiOutput(outputId = input$text_sel)
+          )
         })
 
         output$data_view <- renderUI({
@@ -356,11 +359,7 @@ iPlot <- function(
             )
           })
           
-          do.call(tagList, list_conditions)
-          
-#           tagList(
-#             uiOutput("count")
-#           )
+         do.call(tagList, list_conditions)
         })
         
         output$count <- renderText({
@@ -428,6 +427,46 @@ iPlot <- function(
             actionButton("quit","Quit iPlot")
           )
         })
+        
+        output$dlData <- downloadHandler(
+          filename = function() "test.xlsx",
+          content = function(con) {
+            temp_file <- paste(tempfile(), "test.xlsx", sep = "_")
+            on.exit(unlink(temp_file))
+            xlfun <- function(input, output) {
+              if(nrow(main_data() > 10000)) stop("Too many rows in data for memory to handle!")
+              require(XLConnect)
+              wb <- loadWorkbook(output, create = TRUE)
+              createSheet(wb, name = "output")
+              writeWorksheet(wb, input, sheet = "output")
+              saveWorkbook(wb)
+            }
+            xlfun(main_data(), temp_file)
+            bytes <- readBin(temp_file, "raw", file.info(temp_file)$size)
+            writeBin(bytes, con)
+
+          }
+        )
+        
+        output$dlGraph <- downloadHandler(
+          filename = function() "test.pdf",
+          content = function(con) {
+            
+            stop("Graph export not implemented yet!")
+            
+#             temp_file <- paste(tempfile(), "test.pdf", sep = "_")
+#             on.exit(unlink(temp_file))
+#             pngfun <- function(input, output) {
+#               pdf(output)
+#               browser()
+#               generateThePlot()
+#               dev.off()
+#             }
+#             pngfun(last_plot(), temp_file)
+#             bytes <- readBin(temp_file, "raw", file.info(temp_file)$size)
+#             writeBin(bytes, con)
+          }
+        )
       }
     )
     , ...)
