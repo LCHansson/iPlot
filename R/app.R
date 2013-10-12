@@ -90,7 +90,7 @@ iPlot <- function(
             class="span2",
             div(
               class="row",
-              uiOutput("buttons")
+              div(class="span2",uiOutput("buttons"))
             )
           )
         )
@@ -316,6 +316,8 @@ iPlot <- function(
         #### TABLE focus area ####
         
         output$select_analysis <- renderUI({
+          if(options$table == FALSE) return()
+          
           tagList(
             div(
               class="span2",
@@ -356,6 +358,8 @@ iPlot <- function(
         })
 
         output$analysis <- renderUI({
+          if(options$table == FALSE) return()
+          
           tagList(
             div(class="span8",uiOutput("count")),
             uiOutput(outputId = input$text_sel)
@@ -440,10 +444,10 @@ iPlot <- function(
         #### RIGHT COLUMN focus area ####
         output$buttons <- renderUI({
           tagList(
-            downloadButton("dlData","Download data"),
-            downloadButton("dlGraph","Save graph"),
-            actionButton("options", "Advanced settings"),
-            actionButton("quit","Quit iPlot")
+            downloadButton("dlData","Download data", "btn-primary btn-small btn-block btn-rmenu"),
+            downloadButton("dlGraph","Save graph", "btn-primary btn-small btn-block btn-rmenu"),
+            actionButton2("options", "Advanced settings","btn action-button btn-primary btn-small btn-block btn-rmenu"),
+            actionButton2("quit","Quit iPlot","btn action-button btn-primary btn-small btn-block btn-rmenu")
           )
         })
         
