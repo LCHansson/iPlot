@@ -452,7 +452,7 @@ iPlot <- function(
         
         output$dlData <- downloadHandler(
           filename = function() {
-            if(require(XLConnect)) {
+            if("XLConnect" %in% rownames(installed.packages())) {
               "test.xlsx" 
             } else {
               "test.csv"
