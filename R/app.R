@@ -444,7 +444,10 @@ iPlot <- function(
         })
         
         output$dlData <- downloadHandler(
-          filename = function() "test.xlsx",
+          filename = function() {
+            if(require(XLConnect)) "test.xlsx"
+            "test.csv"
+          },
           content = function(con) {
             temp_file <- paste(tempfile(), "test.xlsx", sep = "_")
             on.exit(unlink(temp_file))
@@ -454,11 +457,17 @@ iPlot <- function(
               print(nrows)
               
               if(nrows > limit) stop(sprintf("Too many rows in data for memory to handle! Your data contains %s rows and the limit is set to %s", nrows, limit))
-              if(!require(XLConnect)) warning("Could not find package 'XLConnect'. Exporting data to CSV instead of XLS. Please run install.packages('XLConnect') to enable export to XLS.")
-              wb <- loadWorkbook(output, create = TRUE)
-              createSheet(wb, name = "output")
-              writeWorksheet(wb, input, sheet = "output")
-              saveWorkbook(wb)
+              
+              if(!require(XLConnect)) {
+                warning("Could not find package 'XLConnect'. Exporting data to CSV instead of XLS. Please run install.packages('XLConnect') to enable export to XLS.")
+                
+                write.csv(main_data(),file=output)
+              } else {
+                wb <- loadWorkbook(output, create = TRUE)
+                createSheet(wb, name = "output")
+                writeWorksheet(wb, input, sheet = "output")
+                saveWorkbook(wb)
+              }
             }
             xlfun(main_data(), temp_file)
             bytes <- readBin(temp_file, "raw", file.info(temp_file)$size)
