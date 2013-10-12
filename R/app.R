@@ -24,7 +24,6 @@ iPlot <- function(
   options = list(),
   ...
 ){
-  
   options <- defaultOptions(options)
   
   if(class(data) != "iData") {
@@ -453,8 +452,11 @@ iPlot <- function(
         
         output$dlData <- downloadHandler(
           filename = function() {
-            if(require(XLConnect)) "test.xlsx"
-            "test.csv"
+            if(require(XLConnect)) {
+              "test.xlsx" 
+            } else {
+              "test.csv"
+            }
           },
           content = function(con) {
             temp_file <- paste(tempfile(), "test.xlsx", sep = "_")
