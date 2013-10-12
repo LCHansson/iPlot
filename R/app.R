@@ -21,8 +21,11 @@ iPlot <- function(
   width = 800,
   geom = geom_density(alpha = .3),
   liveSearchLimit = 7,
+  options = list(),
   ...
 ){
+  
+  options <- defaultOptions(options)
   
   if(class(data) != "iData") {
     static <- iData(data) 
@@ -95,9 +98,9 @@ iPlot <- function(
       
       ## SERVER ----------------------------------------------------------------
       server = function(input, output, session) {
+
         observe({
           print(input$test)
-          
         })
         
         
@@ -117,6 +120,15 @@ iPlot <- function(
             }
           })
           static$data[Reduce("&", c(num_conditions, cat_conditions)), ]
+        })
+        
+        ## Quit button
+        observe({
+          if(is.null(input$quit)) return()
+          if(input$quit == 0) return()
+          input$quit
+          
+          stopApp()
         })
         
         
@@ -181,6 +193,8 @@ iPlot <- function(
         #### GRAPH focus area ####
         
         output$select_method <- renderUI({
+          if(options$graph == FALSE) return()
+          
           tagList(
             div(
               class="span2",
@@ -268,6 +282,7 @@ iPlot <- function(
         })
 
         output$main_plot <- renderPlot({
+          if(options$graph == FALSE) return()
           
           data <- main_data()
           if(input$fill != "None") {
@@ -434,8 +449,12 @@ iPlot <- function(
             temp_file <- paste(tempfile(), "test.xlsx", sep = "_")
             on.exit(unlink(temp_file))
             xlfun <- function(input, output) {
-              if(nrow(main_data() > 10000)) stop("Too many rows in data for memory to handle!")
-              require(XLConnect)
+              nrows <- nrow(main_data())
+              limit <- 10000
+              print(nrows)
+              
+              if(nrows > limit) stop(sprintf("Too many rows in data for memory to handle! Your data contains %s rows and the limit is set to %s", nrows, limit))
+              if(!require(XLConnect)) warning("Could not find package 'XLConnect'. Exporting data to CSV instead of XLS. Please run install.packages('XLConnect') to enable export to XLS.")
               wb <- loadWorkbook(output, create = TRUE)
               createSheet(wb, name = "output")
               writeWorksheet(wb, input, sheet = "output")
@@ -458,7 +477,6 @@ iPlot <- function(
 #             on.exit(unlink(temp_file))
 #             pngfun <- function(input, output) {
 #               pdf(output)
-#               browser()
 #               generateThePlot()
 #               dev.off()
 #             }
@@ -467,6 +485,7 @@ iPlot <- function(
 #             writeBin(bytes, con)
           }
         )
+
       }
     )
     , ...)
