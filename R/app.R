@@ -285,9 +285,13 @@ iPlot <- function(
           if(options$graph == FALSE) return()
           
           data <- main_data()
+          
+          # Do nothing if the UI components have not yet been defined
+          if(is.null(input$method)) return()
+          
           if(input$fill != "None") {
             data[[input$fill]] <- as.factor(data[[input$fill]])
-          }          
+          }
           
           if(input$method == "comp") {
             p <- ggplot(data, aes_string(x = input$density, fill = ifelse(input$fill != "None", input$fill, 1))) + 
