@@ -40,8 +40,8 @@ iPlot <- function(
       
       ## UI --------------------------------------------------------------------
       ui = bootstrapPage(
-#         includeCSS(system.file("css/custom.css", package="iPlot")),
-        includeCSS("inst/css/custom.css"),
+        includeCSS(system.file("css/custom.css", package="iPlot")),
+#         includeCSS("inst/css/custom.css"),
         div(
           class="row",
           
