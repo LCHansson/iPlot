@@ -18,3 +18,4 @@ Collate:
     'plot.R'
     'utils.R'
     'iData-class.R'
+    'defaultOptions.R'
