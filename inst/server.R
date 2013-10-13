@@ -4,12 +4,20 @@ height = 600
 width = 800
 geom = geom_density(alpha = .3)
 liveSearchLimit = 7
+iPoptions = list()
+
+iPoptions <- defaultOptions(iPoptions)
 
 if(class(data) != "iData") {
   static <<- iData(data) 
 } else {
   static <<- copy(data)
 }
+
+graphTypes <- c(
+  Composition = "comp",
+  Regression = "regr"
+)
 
 shinyServer(function(input, output, session) {
   
@@ -98,7 +106,7 @@ shinyServer(function(input, output, session) {
   #### GRAPH focus area ####
   
   output$select_method <- renderUI({
-#     if(iPoptions$graph == FALSE) return()
+    if(iPoptions$graph == FALSE) return()
     
     tagList(
       div(
@@ -106,10 +114,7 @@ shinyServer(function(input, output, session) {
         multiselectInput(
           "method",
           label = "Analysis method:",
-          choices = c(
-            Composition = "comp",
-            Regression = "regr"
-          ),
+          choices = graphTypes,
           options = list(
             buttonClass = "btn btn-link btn-core",
             includeSelectAllOption = F,
@@ -117,8 +122,9 @@ shinyServer(function(input, output, session) {
           )
         )
       ),
+      
       conditionalPanel(
-        "input.method == 'comp' | input.method == 'regr'",
+        "input.method == 'comp' | input.method == 'regr' | input.method == 'ts'",
         div(
           class="span2",
           multiselectInput(
@@ -133,6 +139,8 @@ shinyServer(function(input, output, session) {
           )
         )
       ),
+      
+      ## Composition menus
       conditionalPanel(
         "input.method == 'comp'",
         div(
@@ -149,6 +157,8 @@ shinyServer(function(input, output, session) {
           )
         )
       ),
+      
+      ## Regression menus
       conditionalPanel(
         "input.method == 'regr'",
         div(
@@ -187,7 +197,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$main_plot <- renderPlot({
-#     if(iPoptions$graph == FALSE) return()
+    if(iPoptions$graph == FALSE) return()
     
     data <- main_data()
     
@@ -215,13 +225,26 @@ shinyServer(function(input, output, session) {
       print(p)
     }
     
+    if(input$method == "ts") {
+      if(input$fill == "None") {
+        
+        p <- ggplot(data,aes_string(x = input$timevar, y = input$valuevar, color = ifelse(input$fill != "None", input$fill, 1))) +
+          geom_line(alpha=.3) +
+          ggthemes::theme_tufte()
+        
+        print(p)
+      } else {
+        
+      }
+    }
+    
   })
   
   
   #### TABLE focus area ####
   
   output$select_analysis <- renderUI({
-#     if(iPoptions$table == FALSE) return()
+    if(iPoptions$table == FALSE) return()
     
     tagList(
       div(
@@ -263,7 +286,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$analysis <- renderUI({
-#     if(iPoptions$table == FALSE) return()
+    if(iPoptions$table == FALSE) return()
     
     tagList(
       div(class="span8",uiOutput("count")),
