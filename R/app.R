@@ -455,7 +455,8 @@ iPlot <- function(
                   i,
                   paste(format(rv[[i]], digits = 3), collapse = " - "),
                   static$data[[i]],
-                  rv[[i]]
+                  rv[[i]],
+                  main_data()[[i]]
                 )
               })
             })
