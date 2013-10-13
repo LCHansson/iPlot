@@ -6,7 +6,7 @@ Date: 2013-09-01
 Author: Thomas Reinholdsson
 Maintainer: Thomas Reinholdsson <reinholdsson@gmail.com>
 Description: ...
-License: GPLv3
+License: AGPLv3
 Depends:
     shiny,
     RJSONIO,
@@ -18,3 +18,5 @@ Collate:
     'plot.R'
     'utils.R'
     'iData-class.R'
+    'defaultOptions.R'
+    'actionButton2.R'
