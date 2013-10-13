@@ -192,6 +192,42 @@ shinyServer(function(input, output, session) {
             )
           )
         )
+      ),
+      
+      ## Time series menus
+      conditionalPanel(
+        "input.method == 'ts'",
+        div(
+          class="span2",
+          multiselectInput(
+            "timevar",
+            label = "Time variable",
+            choices = c(static$numerics,static$categories),
+            selected = c(static$numerics,static$categories)[2],
+            options = list(
+              buttonClass = "btn btn-link",
+              includeSelectAllOption = T,
+              enableFiltering = T
+            )
+          )
+        )
+      ),
+      conditionalPanel(
+        "input.method == 'ts'",
+        div(
+          class="span2",
+          multiselectInput(
+            "valuevar",
+            label = "Value variable",
+            choices = c(static$numerics,static$categories),
+            selected = c(static$numerics,static$categories)[2],
+            options = list(
+              buttonClass = "btn btn-link",
+              includeSelectAllOption = T,
+              enableFiltering = T
+            )
+          )
+        )
       )
     )
   })
