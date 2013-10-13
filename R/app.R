@@ -408,6 +408,15 @@ iPlot <- function(
         # the filter plots
         rv <- reactiveValues()
         
+        # Temp fix, clear reactive values
+        # Still buggy! Plot keeps coordinates somehow?
+        observe({
+          non_sel <- static$numerics[!static$numerics %in% input$filter_sel]
+          lapply(non_sel, function(i) {
+            rv[[i]] <- c(min(static$data[[i]]), max(static$data[[i]]))
+          })
+        })
+        
         # Reactive function that returns the selected numerical variables
         reactive_nums <- reactive({
           static$numerics[static$numerics %in% input$filter_sel]
