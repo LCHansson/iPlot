@@ -1,3 +1,16 @@
+width = 800
+data = ggplot2::diamonds
+height = 600
+width = 800
+geom = geom_density(alpha = .3)
+liveSearchLimit = 7
+
+if(class(data) != "iData") {
+  static <<- iData(data) 
+} else {
+  static <<- copy(data)
+}
+
 shinyServer(function(input, output, session) {
   
   observe({
