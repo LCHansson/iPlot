@@ -69,7 +69,7 @@ iPlot <- function(
             ),
             div(
               class="row",
-              plotOutput("main_plot"),
+              plotOutput("graph"),
               tags$hr()
             ),
             
@@ -119,6 +119,31 @@ iPlot <- function(
             }
           })
           static$data[Reduce("&", c(num_conditions, cat_conditions)), ]
+        })
+        
+        main_plot <- reactive({
+          data <- main_data()
+          
+          if(input$fill != "None") {
+            data[[input$fill]] <- as.factor(data[[input$fill]])
+          }
+          
+          if(input$method == "comp") {
+            p <- ggplot(data, aes_string(x = input$density, fill = ifelse(input$fill != "None", input$fill, 1))) + 
+              geom + 
+              ggthemes::theme_tufte()
+            
+          }
+          
+          if(input$method == "regr") {
+            p <- ggplot(data,aes_string(x = input$indepvar, y = input$depvar, color = ifelse(input$fill != "None", input$fill, 1))) +
+              geom_point(alpha=.3) +
+              ggthemes::theme_tufte()
+            p <- p + geom_smooth(method = "lm", se=FALSE, linetype = 2, size = 1, color = "#5bc0de")
+            
+          }
+          
+          return(p)
         })
         
         ## Quit button
@@ -276,34 +301,15 @@ iPlot <- function(
           )
         })
 
-        output$main_plot <- renderPlot({
+        output$graph <- renderPlot({
           if(options$graph == FALSE) return()
-          
-          data <- main_data()
           
           # Do nothing if the UI components have not yet been defined
           if(is.null(input$method)) return()
           
-          if(input$fill != "None") {
-            data[[input$fill]] <- as.factor(data[[input$fill]])
-          }
+          p <- main_plot()
           
-          if(input$method == "comp") {
-            p <- ggplot(data, aes_string(x = input$density, fill = ifelse(input$fill != "None", input$fill, 1))) + 
-              geom + 
-              ggthemes::theme_tufte()
-            
-            print(p)
-          }
-          
-          if(input$method == "regr") {
-            p <- ggplot(data,aes_string(x = input$indepvar, y = input$depvar, color = ifelse(input$fill != "None", input$fill, 1))) +
-              geom_point(alpha=.3) +
-              ggthemes::theme_tufte()
-            p <- p + geom_smooth(method = "lm", se=FALSE, linetype = 2, size = 1, color = "#5bc0de")
-            
-            print(p)
-          }
+          print(p)
           
         })
         
@@ -512,19 +518,18 @@ iPlot <- function(
         output$dlGraph <- downloadHandler(
           filename = function() "test.pdf",
           content = function(con) {
-            
-            stop("Graph export not implemented yet!")
-            
-#             temp_file <- paste(tempfile(), "test.pdf", sep = "_")
-#             on.exit(unlink(temp_file))
-#             pngfun <- function(input, output) {
-#               pdf(output)
-#               generateThePlot()
-#               dev.off()
-#             }
-#             pngfun(last_plot(), temp_file)
-#             bytes <- readBin(temp_file, "raw", file.info(temp_file)$size)
-#             writeBin(bytes, con)
+                        
+            temp_file <- paste(tempfile(), "test.pdf", sep = "_")
+            on.exit(unlink(temp_file))
+            pngfun <- function(input, output) {
+              pdf(output)
+              p <- main_plot()
+              print(p)
+              dev.off()
+            }
+            pngfun(last_plot(), temp_file)
+            bytes <- readBin(temp_file, "raw", file.info(temp_file)$size)
+            writeBin(bytes, con)
           }
         )
       }
