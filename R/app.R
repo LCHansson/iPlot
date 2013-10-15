@@ -467,6 +467,8 @@ iPlot <- function(
 #             writeBin(bytes, con)
           }
         )
+        
+        output$quit <- reactive
       }
     )
     , ...)
