@@ -21,8 +21,10 @@ iPlot <- function(
   width = 800,
   geom = geom_density(alpha = .3),
   liveSearchLimit = 7,
+  options = list(),
   ...
 ){
+  options <- defaultOptions(options)
   
   if(class(data) != "iData") {
     static <- iData(data) 
@@ -38,8 +40,8 @@ iPlot <- function(
       
       ## UI --------------------------------------------------------------------
       ui = bootstrapPage(
-#         includeCSS(system.file("css/custom.css", package="iPlot")),
-        includeCSS("inst/css/custom.css"),
+        includeCSS(system.file("css/custom.css", package="iPlot")),
+#         includeCSS("inst/css/custom.css"),
         div(
           class="row",
           
@@ -87,7 +89,7 @@ iPlot <- function(
             class="span2",
             div(
               class="row",
-              uiOutput("buttons")
+              div(class="span2",uiOutput("buttons"))
             )
           )
         )
@@ -95,9 +97,9 @@ iPlot <- function(
       
       ## SERVER ----------------------------------------------------------------
       server = function(input, output, session) {
+
         observe({
           print(input$test)
-          
         })
         
         
@@ -117,6 +119,15 @@ iPlot <- function(
             }
           })
           static$data[Reduce("&", c(num_conditions, cat_conditions)), ]
+        })
+        
+        ## Quit button
+        observe({
+          if(is.null(input$quit)) return()
+          if(input$quit == 0) return()
+          input$quit
+          
+          stopApp()
         })
         
         
@@ -181,6 +192,8 @@ iPlot <- function(
         #### GRAPH focus area ####
         
         output$select_method <- renderUI({
+          if(options$graph == FALSE) return()
+          
           tagList(
             div(
               class="span2",
@@ -268,11 +281,16 @@ iPlot <- function(
         })
 
         output$main_plot <- renderPlot({
+          if(options$graph == FALSE) return()
           
           data <- main_data()
+          
+          # Do nothing if the UI components have not yet been defined
+          if(is.null(input$method)) return()
+          
           if(input$fill != "None") {
             data[[input$fill]] <- as.factor(data[[input$fill]])
-          }          
+          }
           
           if(input$method == "comp") {
             p <- ggplot(data, aes_string(x = input$density, fill = ifelse(input$fill != "None", input$fill, 1))) + 
@@ -297,6 +315,8 @@ iPlot <- function(
         #### TABLE focus area ####
         
         output$select_analysis <- renderUI({
+          if(options$table == FALSE) return()
+          
           tagList(
             div(
               class="span2",
@@ -337,6 +357,8 @@ iPlot <- function(
         })
 
         output$analysis <- renderUI({
+          if(options$table == FALSE) return()
+          
           tagList(
             div(class="span8",uiOutput("count")),
             uiOutput(outputId = input$text_sel)
@@ -421,25 +443,41 @@ iPlot <- function(
         #### RIGHT COLUMN focus area ####
         output$buttons <- renderUI({
           tagList(
-            downloadButton("dlData","Download data"),
-            downloadButton("dlGraph","Save graph"),
-            actionButton("options", "Advanced settings"),
-            actionButton("quit","Quit iPlot")
+            downloadButton("dlData","Download data", "btn-primary btn-small btn-block btn-rmenu"),
+            downloadButton("dlGraph","Save graph", "btn-primary btn-small btn-block btn-rmenu"),
+            actionButton2("options", "Advanced settings","btn action-button btn-primary btn-small btn-block btn-rmenu"),
+            actionButton2("quit","Quit iPlot","btn action-button btn-primary btn-small btn-block btn-rmenu")
           )
         })
         
         output$dlData <- downloadHandler(
-          filename = function() "test.xlsx",
+          filename = function() {
+            if("XLConnect" %in% rownames(installed.packages())) {
+              "test.xlsx" 
+            } else {
+              "test.csv"
+            }
+          },
           content = function(con) {
             temp_file <- paste(tempfile(), "test.xlsx", sep = "_")
             on.exit(unlink(temp_file))
             xlfun <- function(input, output) {
-              if(nrow(main_data() > 10000)) stop("Too many rows in data for memory to handle!")
-              require(XLConnect)
-              wb <- loadWorkbook(output, create = TRUE)
-              createSheet(wb, name = "output")
-              writeWorksheet(wb, input, sheet = "output")
-              saveWorkbook(wb)
+              nrows <- nrow(main_data())
+              limit <- 10000
+              print(nrows)
+              
+              if(nrows > limit) stop(sprintf("Too many rows in data for memory to handle! Your data contains %s rows and the limit is set to %s", nrows, limit))
+              
+              if(!require(XLConnect)) {
+                warning("Could not find package 'XLConnect'. Exporting data to CSV instead of XLS. Please run install.packages('XLConnect') to enable export to XLS.")
+                
+                write.csv(main_data(),file=output)
+              } else {
+                wb <- loadWorkbook(output, create = TRUE)
+                createSheet(wb, name = "output")
+                writeWorksheet(wb, input, sheet = "output")
+                saveWorkbook(wb)
+              }
             }
             xlfun(main_data(), temp_file)
             bytes <- readBin(temp_file, "raw", file.info(temp_file)$size)
@@ -458,7 +496,6 @@ iPlot <- function(
 #             on.exit(unlink(temp_file))
 #             pngfun <- function(input, output) {
 #               pdf(output)
-#               browser()
 #               generateThePlot()
 #               dev.off()
 #             }
@@ -467,8 +504,6 @@ iPlot <- function(
 #             writeBin(bytes, con)
           }
         )
-        
-        output$quit <- reactive
       }
     )
     , ...)
