@@ -35,7 +35,21 @@ iPlot <- function(
     static <- copy(data)
   }
   
+  ## FIX: THIS SHOULD BE AN INPUT PARAMETER
   graphTypes = c("density", "scatter")
+  
+  ## FIX: THESE NAMES SHOULD BE STORED IN A MODULE OR GLOBALS.R OR SOMETHING SIMILAR
+  stat_names <- c(
+    Mean = "mean(x,na.rm=T)",
+    Median = "median(x,na.rm=T)",
+    Stddev = "sd(x,na.rm=T)",
+    Q05 = "quantile(x,0.05,na.rm=T)",
+    Q10 = "quantile(x,0.10,na.rm=T)",
+    Q25 = "quantile(x,0.25,na.rm=T)",
+    Q75 = "quantile(x,0.75,na.rm=T)",
+    Q90 = "quantile(x,0.90,na.rm=T)",
+    Q95 = "quantile(x,0.95,na.rm=T)"
+  )
   
   # Run app
   runApp(
@@ -365,6 +379,23 @@ iPlot <- function(
                   )
                 )
               )
+            ),
+            conditionalPanel(
+              "input.text_sel == 'data_view'",
+              div(
+                class="span2",
+                multiselectInput(
+                  "stat_properties",
+                  label = "Statistical properties",
+                  choices = stat_names,
+                  multiple = T,
+                  options = list(
+                    buttonClass = "btn btn-link",
+                    includeSelectAllOption = T,
+                    enableFiltering = T
+                  )
+                )
+              )
             )
           )
         })
@@ -379,22 +410,36 @@ iPlot <- function(
         })
 
         output$data_view <- renderUI({
+          div(
+            class="span8",
+            tableOutput("var_list")
+          )
+        })
+        
+        output$var_list <- renderTable({
+          if(!require(xtable)) return()
+          if(is.null(input$stat_properties)) return()
+          
           data <- main_data()
           
-          list_conditions <- lapply(input$view_vars, function(i) {
-            tags$ul(
-              class="list-inline",
-              tags$li(i),
-              tags$li(format(mean(data[[i]]),digits=2)),
-              tags$li(format(sd(data[[i]]),digits=2)),
-              tags$li(format(quantile(data[[i]],0.05),digits=2)),
-              tags$li(format(quantile(data[[i]],0.25),digits=2)),
-              tags$li(format(quantile(data[[i]],0.75),digits=2)),
-              tags$li(format(quantile(data[[i]],0.95),digits=2))
-            )
-          })
+          comp_table <- data.frame(sapply(input$stat_properties, function(i) {
+            sapply(data[,input$view_vars], function(x,i) {
+              if(i == "multiselect-all") return(0)
+              eval(parse(text=i))
+            }, i)
+          }))
+
+          # Remove the multiselect-all artifact and rename columns for output
+          if(length(input$stat_properties) > 1) {
+            comp_table <- comp_table[,names(comp_table) != "multiselect.all"]
+          }
+          names(comp_table) <- names(stat_names[stat_names %in% input$stat_properties])
+          row.names(comp_table) <- input$view_vars
           
-         do.call(tagList, list_conditions)
+#           browser()
+          
+          # Print the table
+          return(comp_table)
         })
         
         output$count <- renderText({
@@ -485,7 +530,7 @@ iPlot <- function(
           tagList(
             downloadButton("dlData","Download data", "btn-primary btn-small btn-block btn-rmenu"),
             downloadButton("dlGraph","Save graph", "btn-primary btn-small btn-block btn-rmenu"),
-            actionButton2("options", "Advanced settings","btn action-button btn-primary btn-small btn-block btn-rmenu"),
+#             actionButton2("options", "Advanced settings","btn action-button btn-primary btn-small btn-block btn-rmenu"),
             actionButton2("quit","Quit iPlot","btn action-button btn-primary btn-small btn-block btn-rmenu")
           )
         })
