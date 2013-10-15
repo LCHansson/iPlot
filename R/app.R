@@ -107,11 +107,11 @@ iPlot <- function(
         
         main_data <- reactive({
           
-          num_conditions <- lapply(static$numerics, function(i) {
+          num_conditions <- lapply(reactive_nums(), function(i) {
             static$data[[i]] <= max(rv[[i]]) & static$data[[i]] >= min(rv[[i]])
           })
           
-          cat_conditions <- lapply(static$categories, function(i) {
+          cat_conditions <- lapply(reactive_cats(), function(i) {
             if(length(input[[paste0("menu", i)]]) > 0) {
               static$data[[i]] %in% input[[paste0("menu", i)]]
             } else {
@@ -149,9 +149,7 @@ iPlot <- function(
         })
         
         output$cat_filter <- renderUI({
-          cat_vars <- static$categories[static$categories %in% input$filter_sel]
-          
-          selector_menu_list <- lapply(cat_vars, function(i) {
+          selector_menu_list <- lapply(reactive_cats(), function(i) {
             tbl <- table(static$data[[i]])
             tagList(
               multiselectInput(
@@ -172,9 +170,7 @@ iPlot <- function(
         })
         
         output$filters <- renderUI({
-          plot_vars <- static$numerics[static$numerics %in% input$filter_sel]
-          
-          plot_output_list <- lapply(plot_vars, function(i) {
+          plot_output_list <- lapply(reactive_nums(), function(i) {
             tagList(
               plotOutput(
                 paste0("plot", i),
@@ -408,37 +404,64 @@ iPlot <- function(
           do.call(model_type, args = list(formula = formula, data = quote(hw_sub), ...))
         }
         
-        ## Thomas: PLEASE add inline documentation of the following code!
+        # Using reactive values to store the click coordinates from
+        # the filter plots
         rv <- reactiveValues()
         
-        for (var in static$numerics) {
-          
-          local({
-            i <- var
-            rv[[i]] <- c(min(static$data[[i]], na.rm = T), max(static$data[[i]], na.rm = T))
-            
-            observe({
-              rv[[i]] <- setInput(
-                rv[[i]],
-                input[[paste0("click", i)]],
-                max(density(static$data[[i]])$y)/2
-              )
-            })
+        # Temp fix, clear reactive values
+        # Still buggy! Plot keeps coordinates somehow?
+        observe({
+          non_sel <- static$numerics[!static$numerics %in% input$filter_sel]
+          lapply(non_sel, function(i) {
+            rv[[i]] <- c(min(static$data[[i]]), max(static$data[[i]]))
           })
-          
-          local({
-            i <- var
+        })
+        
+        # Reactive function that returns the selected numerical variables
+        reactive_nums <- reactive({
+          static$numerics[static$numerics %in% input$filter_sel]
+        })
+        
+        # Reactive function that returns the selected categorical variables
+        reactive_cats <- reactive({
+          static$categories[static$categories %in% input$filter_sel]
+        })
+        
+        observe({
+          # Create a small filter plot for each selected numerical variable
+          for (var in reactive_nums()) {
             
-            output[[paste0("plot", i)]] <- renderPlot({
-              mini_plot(
-                i,
-                paste(format(rv[[i]], digits = 3), collapse = " - "),
-                static$data[[i]],
-                rv[[i]]
-              )
+            # Need to use local, see http://stackoverflow.com/questions/15875786
+            # Thanks Rahul Savani!
+            local({
+              i <- var
+              rv[[i]] <- c(min(static$data[[i]], na.rm = T), max(static$data[[i]],
+                na.rm = T))
+              
+              observe({
+                rv[[i]] <- setInput(
+                  rv[[i]],
+                  input[[paste0("click", i)]],
+                  max(density(static$data[[i]])$y)/2
+                )
+              })
             })
-          })
-        }
+            
+            local({
+              i <- var
+              
+              output[[paste0("plot", i)]] <- renderPlot({
+                mini_plot(
+                  i,
+                  paste(format(rv[[i]], digits = 3), collapse = " - "),
+                  static$data[[i]],
+                  rv[[i]],
+                  main_data()[[i]]
+                )
+              })
+            })
+          }
+        })
         
         #### RIGHT COLUMN focus area ####
         output$buttons <- renderUI({
@@ -504,7 +527,6 @@ iPlot <- function(
 #             writeBin(bytes, con)
           }
         )
-
       }
     )
     , ...)
