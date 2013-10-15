@@ -19,11 +19,14 @@ iPlot <- function(
   data = ggplot2::diamonds,
   height = 600,
   width = 800,
-  geom = geom_density(alpha = .3),
+  geom = NULL,
   liveSearchLimit = 7,
   options = list(),
   ...
 ){
+  
+  if(!is.null(geom)) warning("Parameter 'geom' is deprecated. Please stop using it.")
+  
   options <- defaultOptions(options)
   
   if(class(data) != "iData") {
@@ -129,18 +132,26 @@ iPlot <- function(
           }
           
           if(input$method == "comp") {
-            p <- ggplot(data, aes_string(x = input$density, fill = ifelse(input$fill != "None", input$fill, 1))) + 
-              geom + 
+            p <- ggplot(data, aes_string(x = input$density, fill = ifelse(input$fill != "None", input$fill, FALSE))) + 
+              geom_density(alpha = ifelse(require(pmreports),0.7,0.3)) + 
               ggthemes::theme_tufte()
-            
           }
           
           if(input$method == "regr") {
-            p <- ggplot(data,aes_string(x = input$indepvar, y = input$depvar, color = ifelse(input$fill != "None", input$fill, 1))) +
-              geom_point(alpha=.3) +
+            p <- ggplot(data,aes_string(x = input$indepvar, y = input$depvar, color = ifelse(input$fill != "None", input$fill, FALSE))) +
+              geom_point(alpha=ifelse(require(pmreports),0.7,0.3)) +
               ggthemes::theme_tufte()
             p <- p + geom_smooth(method = "lm", se=FALSE, linetype = 2, size = 1, color = "#5bc0de")
-            
+          }
+          
+          # Add pmreports styling if it is installed
+          if(require(pmreports)) {
+            p <- style_plot(p, colors=pm_colors(), base_size=16) + aes(alpha=0.7)
+          }
+          
+          # If no fill variable is selected, hide the legend
+          if(input$fill == "None") {
+            p <- p + theme(legend.position="none")
           }
           
           return(p)
@@ -522,7 +533,8 @@ iPlot <- function(
             temp_file <- paste(tempfile(), "test.pdf", sep = "_")
             on.exit(unlink(temp_file))
             pngfun <- function(input, output) {
-              pdf(output)
+              # Make a PDF of size A4
+              pdf(output,width=11.7,height=8.3)
               p <- main_plot()
               print(p)
               dev.off()
