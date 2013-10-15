@@ -417,23 +417,32 @@ iPlot <- function(
         })
         
         output$var_list <- renderTable({
+          require(data.table)
           if(!require(xtable)) return()
           if(is.null(input$stat_properties)) return()
+          if(is.null(input$view_vars)) return()
+
           
-          data <- main_data()
+          data <- data.table(main_data())
           
-          comp_table <- data.frame(sapply(input$stat_properties, function(i) {
-            sapply(data[,input$view_vars], function(x,i) {
+          
+          ## ERROR: When only one variable is selected, the data.table below
+          ## does not behave normally and returns a vecor instead of a one-
+          ## column data.table. This distorts the algorithm!
+          comp_table <- data.table(sapply(input$stat_properties, function(i) {
+            sapply(data[,input$view_vars,with=F], function(x,i) {
               if(i == "multiselect-all") return(0)
               eval(parse(text=i))
             }, i)
           }))
 
+#           browser()
+          
           # Remove the multiselect-all artifact and rename columns for output
           if(length(input$stat_properties) > 1) {
-            comp_table <- comp_table[,names(comp_table) != "multiselect.all"]
+            comp_table <- comp_table[,names(comp_table) != "multiselect-all",with=F]
           }
-          names(comp_table) <- names(stat_names[stat_names %in% input$stat_properties])
+          setnames(comp_table,names(comp_table), names(stat_names[stat_names %in% input$stat_properties]))
           row.names(comp_table) <- input$view_vars
           
 #           browser()

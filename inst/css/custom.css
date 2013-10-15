@@ -59,3 +59,13 @@ td
 .btn-rmenu {
   margin-bottom: 3px;
 }
+
+.table-bordered {
+  border-style: none none none none;
+  border-width: 0px 0px 0px 0px;
+}
+
+.table-bordered td, .table-bordered th {
+  border-left: 0px none;
+  border-top: 0px none;
+}
