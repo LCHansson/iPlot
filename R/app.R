@@ -40,7 +40,7 @@ iPlot <- function(
   # Run app
   runApp(
     list(
-      ui = ui(),  # app ui
+      ui = ui(),  # app ui function
       
       ## SERVER ----------------------------------------------------------------
       server = function(input, output, session) {

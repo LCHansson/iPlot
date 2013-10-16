@@ -16,7 +16,7 @@ mini_plot <- function(title, subtitle = "", vec, sel, vec2 = NULL) {
   usr <- par('usr')
   if(!is.null(min(sel))) {
     if(!is.null(max(sel))){
-       rect(min(sel), usr[3], max(sel), usr[4], col=rgb(0, 0, 0, 0.2), border = NA)
+      rect(min(sel), usr[3], max(sel), usr[4], col=rgb(0, 0, 0, 0.2), border = NA)
     }
   }
   mtext(title, side=3, line=0, adj=0, cex=1, col="black")
