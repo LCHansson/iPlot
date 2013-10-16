@@ -149,6 +149,14 @@ iPlot <- function(
             p <- ggplot(data, aes_string(x = input$density, fill = ifelse(input$fill != "None", input$fill, FALSE))) + 
               geom_density(alpha = ifelse(require(pmreports),0.7,0.3)) + 
               ggthemes::theme_tufte()
+            
+#             browser()
+            if(input$line_coords != "") {
+              x <- as.numeric(input$line_coords)
+              p <- p + 
+                geom_vline(xintercept=x, size=1, linetype=5, alpha=0.7) + 
+                annotate("text",x=x, y=0, label=x, size=5, angle=90, vjust=-0.2, hjust=0, color="gray10", alpha=0.8)
+            }
           }
           
           if(input$method == "regr") {
@@ -186,7 +194,7 @@ iPlot <- function(
         output$select_filters <- renderUI({
           multiselectInput(
             "filter_sel",
-            label = "Choose filters:",
+            label = "",
             choices = c(static$numerics,static$categories),
             selected = c(static$numerics[1:2],static$categories[1:2]),
             multiple = T,
@@ -245,7 +253,7 @@ iPlot <- function(
               class="span2",
               multiselectInput(
                 "method",
-                label = "Analysis method:",
+                label = "",
                 choices = c(
                   Composition = "comp",
                   Regression = "regr"
@@ -257,6 +265,8 @@ iPlot <- function(
                 )
               )
             ),
+            
+            ## Shared graph menus
             conditionalPanel(
               "input.method == 'comp' | input.method == 'regr'",
               div(
@@ -273,6 +283,8 @@ iPlot <- function(
                 )
               )
             ),
+            
+            ## Composition graph menus
             conditionalPanel(
               "input.method == 'comp'",
               div(
@@ -289,6 +301,16 @@ iPlot <- function(
                 )
               )
             ),
+            
+            conditionalPanel(
+              "input.method == 'comp'",
+              div(
+                class="span2",
+                textInput2("line_coords", "Draw a line at","",class="input-small")
+              )
+            ),
+            
+            ## Regression graph menus
             conditionalPanel(
               "input.method == 'regr'",
               div(
@@ -349,7 +371,7 @@ iPlot <- function(
               class="span2",
               multiselectInput(
                 "text_sel",
-                label = "Tables and measures:",
+                label = "",
                 choices = c(
                   Variables = "data_view",
                   Regression = "regr_table"
