@@ -20,3 +20,4 @@ Collate:
     'iData-class.R'
     'defaultOptions.R'
     'actionButton2.R'
+    'ui.R'
