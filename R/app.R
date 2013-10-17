@@ -65,16 +65,11 @@ iPlot <- function(
           #### Filters focus area ####
           div(
             class="span2",
-            div(
-              class="row",
-              uiOutput("select_filters")
-            ),
-            div(
-              class="row",
-              uiOutput("filters"),
+              uiOutput("select_filters"),
               tags$hr(),
+              uiOutput("filters"),
               uiOutput("cat_filter")
-            )
+
           ),
           
           #### Graph focus area ####
@@ -200,7 +195,6 @@ iPlot <- function(
             selected = c(static$numerics[1:2],static$categories[1:2]),
             multiple = T,
             options = list(
-              buttonClass = "btn btn-link btn-core",
               includeSelectAllOption = T,
               enableFiltering = T,
               buttonText = sprintf("#! function(options, select) {return 'Variables (' + options.length + '/%s)'}!#", length(choices))
@@ -262,7 +256,6 @@ iPlot <- function(
                   Regression = "regr"
                 ),
                 options = list(
-                  buttonClass = "btn btn-link btn-core",
                   includeSelectAllOption = F,
                   enableFiltering = F
                 )
@@ -381,7 +374,6 @@ iPlot <- function(
                 ),
                 selected = "Variables",
                 options = list(
-                  buttonClass = "btn btn-link btn-core",
                   includeSelectAllOption = F,
                   enableFiltering = F
                 )
