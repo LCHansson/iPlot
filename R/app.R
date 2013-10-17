@@ -192,17 +192,18 @@ iPlot <- function(
         #### FILTERS focus area ####
 
         output$select_filters <- renderUI({
+          choices <- c(static$numerics,static$categories)
           multiselectInput(
             "filter_sel",
             label = "",
-            choices = c(static$numerics,static$categories),
+            choices = choices,
             selected = c(static$numerics[1:2],static$categories[1:2]),
             multiple = T,
             options = list(
-              buttonClass = "btn btn-link",
+              buttonClass = "btn btn-link btn-core",
               includeSelectAllOption = T,
               enableFiltering = T,
-              buttonText = "#! function(options, select) {return 'Variables (' + options.length + ')'}!#"
+              buttonText = sprintf("#! function(options, select) {return 'Variables (' + options.length + '/%s)'}!#", length(choices))
             )
           )
         })
@@ -213,14 +214,15 @@ iPlot <- function(
             tagList(
               multiselectInput(
                 paste0("menu", i),
-                label = i,
+                label = "",
                 choices = names(tbl),
                 selected = names(tbl),
                 multiple = T,
                 options = list(
                   buttonClass = "btn btn-link",
                   includeSelectAllOption = T,
-                  enableFiltering = T
+                  enableFiltering = T,
+                  buttonText = sprintf("#! function(options, select) {return '%s (' + options.length + '/%s)'}!#", i, length(tbl))
                 )
               )
             )
