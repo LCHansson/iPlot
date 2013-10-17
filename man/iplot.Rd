@@ -3,8 +3,8 @@
 \title{Interactive Plot}
 \usage{
   iPlot(data = ggplot2::diamonds, height = 600,
-    width = 800, geom = geom_density(alpha = 0.3),
-    liveSearchLimit = 7, options = list(), ...)
+    width = 800, geom = NULL, liveSearchLimit = 7,
+    options = list(), ...)
 }
 \arguments{
   \item{data}{dataset}

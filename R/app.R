@@ -199,9 +199,10 @@ iPlot <- function(
             selected = c(static$numerics[1:2],static$categories[1:2]),
             multiple = T,
             options = list(
-              buttonClass = "btn btn-link btn-core",
+              buttonClass = "btn btn-link",
               includeSelectAllOption = T,
-              enableFiltering = T
+              enableFiltering = T,
+              buttonText = "#! function(options, select) {return 'Variables (' + options.length + ')'}!#"
             )
           )
         })
