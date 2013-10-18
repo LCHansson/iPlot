@@ -65,16 +65,11 @@ iPlot <- function(
           #### Filters focus area ####
           div(
             class="span2",
-            div(
-              class="row",
-              uiOutput("select_filters")
-            ),
-            div(
-              class="row",
-              uiOutput("filters"),
+              uiOutput("select_filters"),
               tags$hr(),
+              uiOutput("filters"),
               uiOutput("cat_filter")
-            )
+
           ),
           
           #### Graph focus area ####
@@ -192,16 +187,17 @@ iPlot <- function(
         #### FILTERS focus area ####
 
         output$select_filters <- renderUI({
+          choices <- c(static$numerics,static$categories)
           multiselectInput(
             "filter_sel",
             label = "",
-            choices = c(static$numerics,static$categories),
+            choices = choices,
             selected = c(static$numerics[1:2],static$categories[1:2]),
             multiple = T,
             options = list(
-              buttonClass = "btn btn-link btn-core",
               includeSelectAllOption = T,
-              enableFiltering = T
+              enableFiltering = T,
+              buttonText = sprintf("#! function(options, select) {return 'Variables (' + options.length + '/%s)'}!#", length(choices))
             )
           )
         })
@@ -212,14 +208,15 @@ iPlot <- function(
             tagList(
               multiselectInput(
                 paste0("menu", i),
-                label = i,
+                label = "",
                 choices = names(tbl),
                 selected = names(tbl),
                 multiple = T,
                 options = list(
                   buttonClass = "btn btn-link",
                   includeSelectAllOption = T,
-                  enableFiltering = T
+                  enableFiltering = T,
+                  buttonText = sprintf("#! function(options, select) {return '%s (' + options.length + '/%s)'}!#", i, length(tbl))
                 )
               )
             )
@@ -259,7 +256,6 @@ iPlot <- function(
                   Regression = "regr"
                 ),
                 options = list(
-                  buttonClass = "btn btn-link btn-core",
                   includeSelectAllOption = F,
                   enableFiltering = F
                 )
@@ -378,7 +374,6 @@ iPlot <- function(
                 ),
                 selected = "Variables",
                 options = list(
-                  buttonClass = "btn btn-link btn-core",
                   includeSelectAllOption = F,
                   enableFiltering = F
                 )
@@ -559,10 +554,10 @@ iPlot <- function(
         #### RIGHT COLUMN focus area ####
         output$buttons <- renderUI({
           tagList(
-            downloadButton("dlData","Download data", "btn-primary btn-small btn-block btn-rmenu"),
-            downloadButton("dlGraph","Save graph", "btn-primary btn-small btn-block btn-rmenu"),
+            downloadButton("dlData", HTML("<i class=\"icon-download\"></i>"), "btn btn-link"), br(),
+            downloadButton("dlGraph", HTML("<i class=\"icon-eye-open\"></i>"), "btn btn-link"), br(),
 #             actionButton2("options", "Advanced settings","btn action-button btn-primary btn-small btn-block btn-rmenu"),
-            actionButton2("quit","Quit iPlot","btn action-button btn-primary btn-small btn-block btn-rmenu")
+            actionButton2("quit", HTML("<i class=\"icon-off\"></i>"), "btn btn-link")
           )
         })
         
