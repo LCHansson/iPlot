@@ -130,7 +130,20 @@ iPlot <- function(
               TRUE
             }
           })
-          static$data[Reduce("&", c(num_conditions, cat_conditions)), ]
+          data <- static$data[Reduce("&", c(num_conditions, cat_conditions)), ]
+#           browser()
+          if(is.null(input$sampleButton)) return(data)
+          
+          if(input$sampleButton %% 2 == 1) {
+            if(nrow(data) > 50000) {
+              return(data[sort(sample(nrow(data), 10000)),])
+            } else {
+              return(data[sort(sample(nrow(data), nrow(data) %/% 10)),])
+            }
+          }
+          
+          return(data)
+          
         })
         
         main_plot <- reactive({
@@ -172,15 +185,6 @@ iPlot <- function(
           }
           
           return(p)
-        })
-        
-        ## Quit button
-        observe({
-          if(is.null(input$quit)) return()
-          if(input$quit == 0) return()
-          input$quit
-          
-          stopApp()
         })
         
         
@@ -557,10 +561,13 @@ iPlot <- function(
             downloadButton("dlData", HTML("<i class=\"icon-download\"></i>"), "btn btn-link"), br(),
             downloadButton("dlGraph", HTML("<i class=\"icon-eye-open\"></i>"), "btn btn-link"), br(),
 #             actionButton2("options", "Advanced settings","btn action-button btn-primary btn-small btn-block btn-rmenu"),
-            actionButton2("quit", HTML("<i class=\"icon-off\"></i>"), "btn btn-link")
+            actionButton2("sampleButton",HTML("<i class=\"icon-fast-forward\"></i>"),"btn action-button btn-link"),
+            uiOutput("sampleActive"),
+            actionButton2("quit", HTML("<i class=\"icon-off\"></i>"), "btn action-button btn-link")
           )
         })
         
+        ## Download data button
         output$dlData <- downloadHandler(
           filename = function() {
             if("XLConnect" %in% rownames(installed.packages())) {
@@ -597,6 +604,7 @@ iPlot <- function(
           }
         )
         
+        ## Graph download button
         output$dlGraph <- downloadHandler(
           filename = function() "test.pdf",
           content = function(con) {
@@ -615,6 +623,26 @@ iPlot <- function(
             writeBin(bytes, con)
           }
         )
+        
+        output$sampleActive <- renderUI({
+          if(is.null(input$sampleButton)) return()
+          
+          if(input$sampleButton %% 2 == 1) {
+              return(
+                HTML("<i class=\"icon-ok-sign\"></i>")
+              )
+          }
+        })
+
+        
+        ## Quit button
+        observe({
+          if(is.null(input$quit)) return()
+          if(input$quit == 0) return()
+          input$quit
+          
+          stopApp()
+        })
       }
     )
     , ...)
