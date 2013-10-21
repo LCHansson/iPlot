@@ -561,8 +561,7 @@ iPlot <- function(
             downloadButton("dlData", HTML("<i class=\"icon-download\"></i>"), "btn btn-link"), br(),
             downloadButton("dlGraph", HTML("<i class=\"icon-eye-open\"></i>"), "btn btn-link"), br(),
 #             actionButton2("options", "Advanced settings","btn action-button btn-primary btn-small btn-block btn-rmenu"),
-            actionButton2("sampleButton",HTML("<i class=\"icon-fast-forward\"></i>"),"btn action-button btn-link"),
-            uiOutput("sampleActive"),
+            bootstrapCheckbox("sampleButton", "", options = list(checkedClass = "icon-ok-sign", uncheckedClass = "icon-fast-forward")),
             actionButton2("quit", HTML("<i class=\"icon-off\"></i>"), "btn action-button btn-link")
           )
         })
@@ -623,17 +622,6 @@ iPlot <- function(
             writeBin(bytes, con)
           }
         )
-        
-        output$sampleActive <- renderUI({
-          if(is.null(input$sampleButton)) return()
-          
-          if(input$sampleButton %% 2 == 1) {
-              return(
-                HTML("<i class=\"icon-ok-sign\"></i>")
-              )
-          }
-        })
-
         
         ## Quit button
         observe({
