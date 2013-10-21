@@ -5,7 +5,6 @@ iData <- setRefClass(
     categories = "character",
     numerics = "character",
     all = "character",
-    #removed_na = "numeric",
     levels = "list"
   ),
   methods = list(
@@ -15,7 +14,6 @@ iData <- setRefClass(
       }
       data <<- data
       update_fields()
-      #clean_data()
     },
     update_fields = function() {
       categories <<- filter(
@@ -27,12 +25,6 @@ iData <- setRefClass(
     },
     filter = function(fun) {
       names(data)[sapply(data, fun)]
-    },
-    clean_data = function() {
-      #nrows <- nrow(data)
-      #data <<- na.omit(data)
-      #removed_na <<- nrows - nrow(data)
-      #if (removed_na > 0) warning(removed_na, " rows including NA removed.")
     }
   )
 )

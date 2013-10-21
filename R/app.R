@@ -143,20 +143,15 @@ iPlot <- function(
           if(input$fill != "None") {
             data[[input$fill]] <- as.factor(data[[input$fill]])
           }
-          #browser()
-          #data <- data[, c(input$density, 
-          
           
           if(input$method == "comp") {
             vars <- unique(c(input$density, input$fill))
             vars <- vars[vars != "None"]
             data <- na.omit(subset(data, select = vars))
-            #vars <- c(input$density)
             p <- ggplot(data, aes_string(x = input$density, fill = ifelse(input$fill != "None", input$fill, FALSE))) + 
               geom_density(alpha = ifelse(require(pmreports),0.7,0.3)) + 
               ggthemes::theme_tufte()
             
-#             browser()
             if(input$line_coords != "") {
               x <- as.numeric(input$line_coords)
               p <- p + 
@@ -438,10 +433,7 @@ iPlot <- function(
         output$analysis <- renderUI({
           if(options$table == FALSE) return()
           
-          tagList(
-            div(class="span8",uiOutput("count")),
-            uiOutput(outputId = input$text_sel)
-          )
+          uiOutput(outputId = input$text_sel)
         })
 
         output$data_view <- renderUI({
@@ -460,7 +452,6 @@ iPlot <- function(
           
           data <- data.table(main_data())
           
-          
           ## ERROR: When only one variable is selected, the data.table below
           ## does not behave normally and returns a vecor instead of a one-
           ## column data.table. This distorts the algorithm!
@@ -470,8 +461,6 @@ iPlot <- function(
               eval(parse(text=i))
             }, i)
           }))
-
-#           browser()
           
           # Remove the multiselect-all artifact and rename columns for output
           if(length(input$stat_properties) > 1) {
@@ -480,19 +469,8 @@ iPlot <- function(
           setnames(comp_table,names(comp_table), names(stat_names[stat_names %in% input$stat_properties]))
           row.names(comp_table) <- input$view_vars
           
-#           browser()
-          
           # Print the table
           return(comp_table)
-        })
-        
-        output$count <- renderText({
-          return()
-#           sprintf("Selected %s out of %s, whereas %s deleted because of missing values.",
-#                   nrow(main_data()),
-#                   nrow(static$data),
-#                   static$removed_na
-#           )
         })
         
         #### Regression model functions ####
@@ -566,11 +544,6 @@ iPlot <- function(
                   na.omit(main_data()[[i]])
                 )
               })
-              
-#               output[[paste0("na", i)]] <- renderUI({
-#                 
-#               })
-              
             })
           }
         })
