@@ -15,3 +15,11 @@ setInput <- function(a, b, limit) {
   }
   return(a)
 }
+
+#' NA or false
+#' 
+#' ...
+#' 
+#' @param x vector
+#' @param na NA or false
+na_or_false <- function(x, na) if (na) is.na(x) else rep(F, length(x))

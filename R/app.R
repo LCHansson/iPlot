@@ -120,7 +120,9 @@ iPlot <- function(
         main_data <- reactive({
           
           num_conditions <- lapply(reactive_nums(), function(i) {
-            static$data[[i]] <= max(rv[[i]]) & static$data[[i]] >= min(rv[[i]])
+            static$data[[i]] <= max(rv[[i]], na.rm = T) &
+            static$data[[i]] >= min(rv[[i]], na.rm = T) |
+            na_or_false(static$data[[i]], input[[paste0("na", i)]])
           })
           
           cat_conditions <- lapply(reactive_cats(), function(i) {
@@ -134,13 +136,21 @@ iPlot <- function(
         })
         
         main_plot <- reactive({
+          
           data <- main_data()
           
           if(input$fill != "None") {
             data[[input$fill]] <- as.factor(data[[input$fill]])
           }
+          #browser()
+          #data <- data[, c(input$density, 
+          
           
           if(input$method == "comp") {
+            vars <- unique(c(input$density, input$fill))
+            vars <- vars[vars != "None"]
+            data <- na.omit(subset(data, select = vars))
+            #vars <- c(input$density)
             p <- ggplot(data, aes_string(x = input$density, fill = ifelse(input$fill != "None", input$fill, FALSE))) + 
               geom_density(alpha = ifelse(require(pmreports),0.7,0.3)) + 
               ggthemes::theme_tufte()
@@ -155,6 +165,9 @@ iPlot <- function(
           }
           
           if(input$method == "regr") {
+            vars <- unique(c(input$fill, input$indepvar, input$depvar))
+            vars <- vars[vars != "None"]
+            data <- na.omit(subset(data, select = vars))
             p <- ggplot(data,aes_string(x = input$indepvar, y = input$depvar, color = ifelse(input$fill != "None", input$fill, FALSE))) +
               geom_point(alpha=ifelse(require(pmreports),0.7,0.3)) +
               ggthemes::theme_tufte()
@@ -170,6 +183,9 @@ iPlot <- function(
           if(input$fill == "None") {
             p <- p + theme(legend.position="none")
           }
+          
+          # Write to console
+          message(nrow(data), " observations used in plot.")
           
           return(p)
         })
@@ -232,7 +248,8 @@ iPlot <- function(
                 height = ifelse(height/length(static$numerics) > 100, 100, height/length(static$numerics)), 
                 width = width*0.2, clickId = paste0("click", i)
               ),
-              textOutput(paste0("text", i))
+              #textOutput(paste0("text", i))
+              uiOutput(paste0("na", i))
             )
           })
           
@@ -469,11 +486,12 @@ iPlot <- function(
         })
         
         output$count <- renderText({
-          sprintf("Selected %s out of %s, whereas %s deleted because of missing values.",
-                  nrow(main_data()),
-                  nrow(static$data),
-                  static$removed_na
-          )
+          return()
+#           sprintf("Selected %s out of %s, whereas %s deleted because of missing values.",
+#                   nrow(main_data()),
+#                   nrow(static$data),
+#                   static$removed_na
+#           )
         })
         
         #### Regression model functions ####
@@ -501,7 +519,7 @@ iPlot <- function(
         observe({
           non_sel <- static$numerics[!static$numerics %in% input$filter_sel]
           lapply(non_sel, function(i) {
-            rv[[i]] <- c(min(static$data[[i]]), max(static$data[[i]]))
+            rv[[i]] <- c(min(static$data[[i]], na.rm = T), max(static$data[[i]]), na.rm = T)
           })
         })
         
@@ -530,7 +548,7 @@ iPlot <- function(
                 rv[[i]] <- setInput(
                   rv[[i]],
                   input[[paste0("click", i)]],
-                  max(density(static$data[[i]])$y)/2
+                  max(density(static$data[[i]], na.rm = T)$y)/2
                 )
               })
             })
@@ -542,11 +560,16 @@ iPlot <- function(
                 mini_plot(
                   i,
                   paste(format(rv[[i]], digits = 3), collapse = " - "),
-                  static$data[[i]],
+                  na.omit(static$data[[i]]),
                   rv[[i]],
-                  main_data()[[i]]
+                  na.omit(main_data()[[i]])
                 )
               })
+              
+              output[[paste0("na", i)]] <- renderUI({
+                checkboxInput(paste0("na", i), "Allow NA", T)
+              })
+              
             })
           }
         })
