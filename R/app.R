@@ -127,7 +127,8 @@ iPlot <- function(
           
           cat_conditions <- lapply(reactive_cats(), function(i) {
             if(length(input[[paste0("menu", i)]]) > 0) {
-              static$data[[i]] %in% input[[paste0("menu", i)]]
+              static$data[[i]] %in% input[[paste0("menu", i)]] |
+              na_or_false(static$data[[i]], input[[paste0("na", i)]])
             } else {
               TRUE
             }
@@ -234,7 +235,8 @@ iPlot <- function(
                   enableFiltering = T,
                   buttonText = sprintf("#! function(options, select) {return '%s (' + options.length + '/%s)'}!#", i, length(tbl))
                 )
-              )
+              ),
+              checkboxInput(paste0("na", i), "Allow NA", T)
             )
           })
           do.call(tagList, selector_menu_list)
@@ -248,8 +250,7 @@ iPlot <- function(
                 height = ifelse(height/length(static$numerics) > 100, 100, height/length(static$numerics)), 
                 width = width*0.2, clickId = paste0("click", i)
               ),
-              #textOutput(paste0("text", i))
-              uiOutput(paste0("na", i))
+              checkboxInput(paste0("na", i), "Allow NA", T)
             )
           })
           
@@ -566,9 +567,9 @@ iPlot <- function(
                 )
               })
               
-              output[[paste0("na", i)]] <- renderUI({
-                checkboxInput(paste0("na", i), "Allow NA", T)
-              })
+#               output[[paste0("na", i)]] <- renderUI({
+#                 
+#               })
               
             })
           }
