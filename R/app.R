@@ -59,73 +59,91 @@ iPlot <- function(
       ui = bootstrapPage(
         includeCSS(system.file("css/custom.css", package="iPlot")),
 #         includeCSS("inst/css/custom.css"),
-        div(
-          class="row",
+        
+        tags$script(type = "text/javascript", "
+          $(function() { // Run when DOM ready
+            $(window).bind('beforeunload', function(e) {
+              Shiny.onInputChange('quit', true); // sets input$quit to true
+            });
+          });
+        "),
+        
+        uiOutput("mainUI")
+      ),
+      
+      ## SERVER ----------------------------------------------------------------
+      server = function(input, output, session) {
+
+        #### What is this? ping @reinholdsson ####
+        observe({
+          print(input$test)
+        })
+        
+        
+        #### Main UI grid ####
+        
+        output$mainUI <- renderUI({
+          #### Define what components to include ####
+          # (Actually, this should also include the "filters" and "buttons"
+          # components. We'll implement that later...)
+          components <- c("graph", "table")
+          components <- components[components %in% names(options[options==TRUE])]
           
           #### Filters focus area ####
-          div(
+          filterUI <- div(
             class="span2",
-              uiOutput("select_filters"),
-              tags$hr(),
-              uiOutput("filters"),
-              uiOutput("cat_filter")
-
-          ),
+            uiOutput("select_filters"),
+            tags$hr(),
+            uiOutput("filters"),
+            uiOutput("cat_filter")
+          )
           
-          #### Graph focus area ####
-          div(
-            class="span8",
-            div(
-              class="row",
-              uiOutput("select_method")
-            ),
-            div(
-              class="row",
-              plotOutput("graph"),
-              tags$hr()
-            ),
-            
-            #### Table/numeric focus area ####
-            div(
-              class="row",
-              uiOutput("select_analysis")
-            ),
-            div(
-              class="row",
-              uiOutput("analysis")
+          #### Graph and table focus areas #### 
+          mainUI <- lapply(components, function(i) {
+            tagList(
+              div(
+                class="row",
+                uiOutput(paste0("select_",i))
+              ),
+              div(
+                class="row",
+                plotOutput(i),
+                tags$hr()
+              )
             )
-          ),
+          })
           
-          #### Right column focus area ####
-          div(
+          #### Right column buttons focus area ####
+          buttonUI <- div(
             class="span2",
             div(
               class="row",
               div(class="span2",uiOutput("buttons"))
             )
           )
-        )
-      ),
-      
-      ## SERVER ----------------------------------------------------------------
-      server = function(input, output, session) {
-
-        observe({
-          print(input$test)
+          
+          div(class="row", 
+              filterUI,
+              div(class="span8",mainUI),
+              buttonUI
+          )
         })
-        
         
         #### Reactive internals ####
         
+        ## Main data
         main_data <- reactive({
           
           num_conditions <- lapply(reactive_nums(), function(i) {
-            static$data[[i]] <= max(rv[[i]]) & static$data[[i]] >= min(rv[[i]])
+            static$data[[i]] <= max(rv[[i]], na.rm = T) &
+            static$data[[i]] >= min(rv[[i]], na.rm = T) |
+            na_or_false(static$data[[i]], input[[paste0("na", i)]])
           })
           
           cat_conditions <- lapply(reactive_cats(), function(i) {
             if(length(input[[paste0("menu", i)]]) > 0) {
-              static$data[[i]] %in% input[[paste0("menu", i)]]
+              static$data[[i]] %in% input[[paste0("menu", i)]] |
+              na_or_false(static$data[[i]], input[[paste0("na", i)]])
             } else {
               TRUE
             }
@@ -146,32 +164,76 @@ iPlot <- function(
           
         })
         
+        ## Main plot
         main_plot <- reactive({
+          
+          # Get data
           data <- main_data()
           
+          # Fill variable?
           if(input$fill != "None") {
             data[[input$fill]] <- as.factor(data[[input$fill]])
           }
           
+          # Component analysis module
           if(input$method == "comp") {
+            vars <- unique(c(input$density, input$fill))
+            vars <- vars[vars != "None"]
+            data <- na.omit(subset(data, select = vars))
             p <- ggplot(data, aes_string(x = input$density, fill = ifelse(input$fill != "None", input$fill, FALSE))) + 
               geom_density(alpha = ifelse(require(pmreports),0.7,0.3)) + 
               ggthemes::theme_tufte()
             
-#             browser()
             if(input$line_coords != "") {
               x <- as.numeric(input$line_coords)
               p <- p + 
                 geom_vline(xintercept=x, size=1, linetype=5, alpha=0.7) + 
-                annotate("text",x=x, y=0, label=x, size=5, angle=90, vjust=-0.2, hjust=0, color="gray10", alpha=0.8)
+                annotate(
+                  "text",x=x, y=0, label=x,
+                  size=5, angle=90, vjust=-0.2, hjust=0, color="gray10", alpha=0.8
+                )
             }
           }
           
-          if(input$method == "regr") {
-            p <- ggplot(data,aes_string(x = input$indepvar, y = input$depvar, color = ifelse(input$fill != "None", input$fill, FALSE))) +
+          if(input$method == "scatter") {
+            vars <- unique(c(input$fill, input$indepvar, input$depvar))
+            vars <- vars[vars != "None"]
+            data <- na.omit(subset(data, select = vars))
+            p <- ggplot(
+              data, aes_string(
+                x = input$indepvar,
+                y = input$depvar,
+                color = ifelse(input$fill != "None", input$fill, FALSE))
+              ) +
               geom_point(alpha=ifelse(require(pmreports),0.7,0.3)) +
               ggthemes::theme_tufte()
-            p <- p + geom_smooth(method = "lm", se=FALSE, linetype = 2, size = 1, color = "#5bc0de")
+            p <- p + geom_smooth(
+              method = "lm", se=FALSE, linetype = 2, size = 1, color = "#5bc0de"
+            )
+          }
+          
+          if(input$method == 'facets') {
+            vars <- unique(c(input$density, input$fill, input$xfacet, input$yfacet))
+            vars <- vars[vars != "None"]
+            data <- na.omit(subset(data, select = vars))
+            p <- ggplot(data, aes_string(x = input$density, fill = ifelse(input$fill != "None", input$fill, FALSE))) + 
+              facet_grid(paste(
+                ifelse(input$yfacet != "None", input$yfacet, "."),
+                "~",
+                ifelse(input$xfacet != "None", input$xfacet, ".")
+                )) +
+              geom_density(alpha = ifelse(require(pmreports),0.7,0.3)) + 
+              ggthemes::theme_tufte()
+            
+            if(input$line_coords != "") {
+              x <- as.numeric(input$line_coords)
+              p <- p + 
+                geom_vline(xintercept=x, size=1, linetype=5, alpha=0.7) + 
+                annotate(
+                  "text",x=x, y=0, label=x,
+                  size=5, angle=90, vjust=-0.2, hjust=0, color="gray10", alpha=0.8
+                )
+            }
           }
           
           # Add pmreports styling if it is installed
@@ -184,7 +246,19 @@ iPlot <- function(
             p <- p + theme(legend.position="none")
           }
           
+          # Write to console
+          message(nrow(data), " observations used in plot.")
+          
           return(p)
+        })
+        
+        ## Quit function
+        observe({
+          if(is.null(input$quit)) return()
+          if(input$quit == 0) return()
+          input$quit
+          
+          stopApp()
         })
         
         
@@ -222,7 +296,13 @@ iPlot <- function(
                   enableFiltering = T,
                   buttonText = sprintf("#! function(options, select) {return '%s (' + options.length + '/%s)'}!#", i, length(tbl))
                 )
-              )
+              ),
+              bootstrapCheckbox(paste0("na", i), "", value = T, options = list(
+                buttonStyle = "btn-link btn-small",
+                checkedClass = "icon-ok",
+                uncheckedClass = "icon-remove",
+                checked = T
+              ))
             )
           })
           do.call(tagList, selector_menu_list)
@@ -236,7 +316,12 @@ iPlot <- function(
                 height = ifelse(height/length(static$numerics) > 100, 100, height/length(static$numerics)), 
                 width = width*0.2, clickId = paste0("click", i)
               ),
-              textOutput(paste0("text", i))
+              bootstrapCheckbox(paste0("na", i), "", value = T, options = list(
+                buttonStyle = "btn-link btn-small",
+                checkedClass = "icon-ok",
+                uncheckedClass = "icon-remove",
+                defaultState = T
+              ))
             )
           })
           
@@ -246,7 +331,7 @@ iPlot <- function(
         
         #### GRAPH focus area ####
         
-        output$select_method <- renderUI({
+        output$select_graph <- renderUI({
           if(options$graph == FALSE) return()
           
           tagList(
@@ -257,7 +342,8 @@ iPlot <- function(
                 label = "",
                 choices = c(
                   Composition = "comp",
-                  Regression = "regr"
+                  Scatter = "scatter",
+                  Facets = "facets"
                 ),
                 options = list(
                   includeSelectAllOption = F,
@@ -268,7 +354,7 @@ iPlot <- function(
             
             ## Shared graph menus
             conditionalPanel(
-              "input.method == 'comp' | input.method == 'regr'",
+              "input.method == 'comp' | input.method == 'scatter' | input.method == 'facets'",
               div(
                 class="span2",
                 multiselectInput(
@@ -286,7 +372,7 @@ iPlot <- function(
             
             ## Composition graph menus
             conditionalPanel(
-              "input.method == 'comp'",
+              "input.method == 'comp' | input.method == 'facets'",
               div(
                 class="span2",
                 multiselectInput(
@@ -303,7 +389,7 @@ iPlot <- function(
             ),
             
             conditionalPanel(
-              "input.method == 'comp'",
+              "input.method == 'comp' | input.method == 'facets'",
               div(
                 class="span2",
                 textInput2("line_coords", "Draw a line at","",class="input-small")
@@ -312,7 +398,7 @@ iPlot <- function(
             
             ## Regression graph menus
             conditionalPanel(
-              "input.method == 'regr'",
+              "input.method == 'scatter'",
               div(
                 class="span2",
                 multiselectInput(
@@ -329,7 +415,7 @@ iPlot <- function(
               )
             ),
             conditionalPanel(
-              "input.method == 'regr'",
+              "input.method == 'scatter'",
               div(
                 class="span2",
                 multiselectInput(
@@ -344,11 +430,47 @@ iPlot <- function(
                   )
                 )
               )
+            ),
+            conditionalPanel(
+              "input.method == 'facets'",
+              div(
+                class="span2",
+                multiselectInput(
+                  "xfacet",
+                  label = "X facets",
+                  choices = c("None",static$categories),
+                  selected = static$categories[1],
+                  options = list(
+                    buttonClass = "btn btn-link",
+                    includeSelectAllOption = T,
+                    enableFiltering = T
+                  )
+                )
+              )
+            ),
+            conditionalPanel(
+              "input.method == 'facets'",
+              div(
+                class="span2",
+                multiselectInput(
+                  "yfacet",
+                  label = "Y facets",
+                  choices = c("None",static$categories),
+                  selected = static$categories[2],
+                  options = list(
+                    buttonClass = "btn btn-link",
+                    includeSelectAllOption = T,
+                    enableFiltering = T
+                  )
+                )
+              )
             )
           )
         })
 
+        ## Plot output
         output$graph <- renderPlot({
+          # Don't draw graph if the graph option is set to FALSE
           if(options$graph == FALSE) return()
           
           # Do nothing if the UI components have not yet been defined
@@ -363,7 +485,7 @@ iPlot <- function(
         
         #### TABLE focus area ####
         
-        output$select_analysis <- renderUI({
+        output$select_table <- renderUI({
           if(options$table == FALSE) return()
           
           tagList(
@@ -421,13 +543,10 @@ iPlot <- function(
           )
         })
 
-        output$analysis <- renderUI({
+        output$table <- renderUI({
           if(options$table == FALSE) return()
           
-          tagList(
-            div(class="span8",uiOutput("count")),
-            uiOutput(outputId = input$text_sel)
-          )
+          uiOutput(outputId = input$text_sel)
         })
 
         output$data_view <- renderUI({
@@ -446,7 +565,6 @@ iPlot <- function(
           
           data <- data.table(main_data())
           
-          
           ## ERROR: When only one variable is selected, the data.table below
           ## does not behave normally and returns a vecor instead of a one-
           ## column data.table. This distorts the algorithm!
@@ -456,8 +574,6 @@ iPlot <- function(
               eval(parse(text=i))
             }, i)
           }))
-
-#           browser()
           
           # Remove the multiselect-all artifact and rename columns for output
           if(length(input$stat_properties) > 1) {
@@ -466,18 +582,8 @@ iPlot <- function(
           setnames(comp_table,names(comp_table), names(stat_names[stat_names %in% input$stat_properties]))
           row.names(comp_table) <- input$view_vars
           
-#           browser()
-          
           # Print the table
           return(comp_table)
-        })
-        
-        output$count <- renderText({
-          sprintf("Selected %s out of %s, whereas %s deleted because of missing values.",
-                  nrow(main_data()),
-                  nrow(static$data),
-                  static$removed_na
-          )
         })
         
         #### Regression model functions ####
@@ -500,12 +606,11 @@ iPlot <- function(
         # the filter plots
         rv <- reactiveValues()
         
-        # Temp fix, clear reactive values
         # Still buggy! Plot keeps coordinates somehow?
         observe({
           non_sel <- static$numerics[!static$numerics %in% input$filter_sel]
           lapply(non_sel, function(i) {
-            rv[[i]] <- c(min(static$data[[i]]), max(static$data[[i]]))
+            rv[[i]] <- c(min(static$data[[i]], na.rm = T), max(static$data[[i]]), na.rm = T)
           })
         })
         
@@ -534,7 +639,7 @@ iPlot <- function(
                 rv[[i]] <- setInput(
                   rv[[i]],
                   input[[paste0("click", i)]],
-                  max(density(static$data[[i]])$y)/2
+                  max(density(static$data[[i]], na.rm = T)$y)/2
                 )
               })
             })
@@ -546,9 +651,9 @@ iPlot <- function(
                 mini_plot(
                   i,
                   paste(format(rv[[i]], digits = 3), collapse = " - "),
-                  static$data[[i]],
+                  na.omit(static$data[[i]]),
                   rv[[i]],
-                  main_data()[[i]]
+                  na.omit(main_data()[[i]])
                 )
               })
             })
@@ -560,7 +665,6 @@ iPlot <- function(
           tagList(
             downloadButton("dlData", HTML("<i class=\"icon-download\"></i>"), "btn btn-link"), br(),
             downloadButton("dlGraph", HTML("<i class=\"icon-eye-open\"></i>"), "btn btn-link"), br(),
-#             actionButton2("options", "Advanced settings","btn action-button btn-primary btn-small btn-block btn-rmenu"),
             bootstrapCheckbox("sampleButton", "", options = list(checkedClass = "icon-ok-sign", uncheckedClass = "icon-fast-forward")),
             actionButton2("quit", HTML("<i class=\"icon-off\"></i>"), "btn action-button btn-link")
           )
@@ -622,15 +726,6 @@ iPlot <- function(
             writeBin(bytes, con)
           }
         )
-        
-        ## Quit button
-        observe({
-          if(is.null(input$quit)) return()
-          if(input$quit == 0) return()
-          input$quit
-          
-          stopApp()
-        })
       }
     )
     , ...)

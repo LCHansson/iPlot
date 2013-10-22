@@ -5,7 +5,6 @@ iData <- setRefClass(
     categories = "character",
     numerics = "character",
     all = "character",
-    removed_na = "numeric",
     levels = "list"
   ),
   methods = list(
@@ -14,8 +13,8 @@ iData <- setRefClass(
         stop("Only data.frame or data.table are supported")
       }
       data <<- data
+      fix_data()
       update_fields()
-      clean_data()
     },
     update_fields = function() {
       categories <<- filter(
@@ -28,11 +27,16 @@ iData <- setRefClass(
     filter = function(fun) {
       names(data)[sapply(data, fun)]
     },
-    clean_data = function() {
-      nrows <- nrow(data)
-      data <<- na.omit(data)
-      removed_na <<- nrows - nrow(data)
-      if (removed_na > 0) warning(removed_na, " rows including NA removed.")
+    fix_data = function() {
+      # Fix colnames due to css error (see issue #1)
+      tmp <- data
+      rpl <- function(x) gsub("\\.", "_", colnames(x))
+      if ("data.table" %in% class(data)) {
+        setnames(tmp, rpl(tmp))
+      } else {
+        colnames(tmp) <- rpl(tmp)
+      }
+      data <<- tmp
     }
   )
 )
