@@ -127,6 +127,7 @@ iPlot <- function(
         
         #### Reactive internals ####
         
+        ## Main data
         main_data <- reactive({
           
           num_conditions <- lapply(reactive_nums(), function(i) {
@@ -146,14 +147,18 @@ iPlot <- function(
           static$data[Reduce("&", c(num_conditions, cat_conditions)), ]
         })
         
+        ## Main plot
         main_plot <- reactive({
           
+          # Get data
           data <- main_data()
           
+          # Fill variable?
           if(input$fill != "None") {
             data[[input$fill]] <- as.factor(data[[input$fill]])
           }
           
+          # Component analysis module
           if(input$method == "comp") {
             vars <- unique(c(input$density, input$fill))
             vars <- vars[vars != "None"]
@@ -173,7 +178,7 @@ iPlot <- function(
             }
           }
           
-          if(input$method == "regr") {
+          if(input$method == "scatter") {
             vars <- unique(c(input$fill, input$indepvar, input$depvar))
             vars <- vars[vars != "None"]
             data <- na.omit(subset(data, select = vars))
@@ -296,7 +301,7 @@ iPlot <- function(
                 label = "",
                 choices = c(
                   Composition = "comp",
-                  Regression = "regr",
+                  Scatter = "scatter",
                   Facets = "facets"
                 ),
                 options = list(
@@ -308,7 +313,7 @@ iPlot <- function(
             
             ## Shared graph menus
             conditionalPanel(
-              "input.method == 'comp' | input.method == 'regr' | input.method == 'facets'",
+              "input.method == 'comp' | input.method == 'scatter' | input.method == 'facets'",
               div(
                 class="span2",
                 multiselectInput(
@@ -352,7 +357,7 @@ iPlot <- function(
             
             ## Regression graph menus
             conditionalPanel(
-              "input.method == 'regr'",
+              "input.method == 'scatter'",
               div(
                 class="span2",
                 multiselectInput(
@@ -369,7 +374,7 @@ iPlot <- function(
               )
             ),
             conditionalPanel(
-              "input.method == 'regr'",
+              "input.method == 'scatter'",
               div(
                 class="span2",
                 multiselectInput(

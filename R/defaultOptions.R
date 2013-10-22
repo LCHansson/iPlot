@@ -10,7 +10,6 @@ defaultOptions <- function(options = list()) {
     graph = TRUE,
     table = TRUE,
     na_handler = TRUE,
-    stack = FALSE,
     facets = TRUE
   )
   
