@@ -200,9 +200,23 @@ iPlot <- function(
             vars <- vars[vars != "None"]
             data <- na.omit(subset(data, select = vars))
             p <- ggplot(data, aes_string(x = input$density, fill = ifelse(input$fill != "None", input$fill, FALSE))) + 
-              facet_grid(paste(input$yfacet, "~", input$xfacet)) +
+              facet_grid(paste(
+                ifelse(input$yfacet != "None", input$yfacet, "."),
+                "~",
+                ifelse(input$xfacet != "None", input$xfacet, ".")
+                )) +
               geom_density(alpha = ifelse(require(pmreports),0.7,0.3)) + 
               ggthemes::theme_tufte()
+            
+            if(input$line_coords != "") {
+              x <- as.numeric(input$line_coords)
+              p <- p + 
+                geom_vline(xintercept=x, size=1, linetype=5, alpha=0.7) + 
+                annotate(
+                  "text",x=x, y=0, label=x,
+                  size=5, angle=90, vjust=-0.2, hjust=0, color="gray10", alpha=0.8
+                )
+            }
           }
           
           # Add pmreports styling if it is installed
@@ -348,7 +362,7 @@ iPlot <- function(
             ),
             
             conditionalPanel(
-              "input.method == 'comp'",
+              "input.method == 'comp' | input.method == 'facets'",
               div(
                 class="span2",
                 textInput2("line_coords", "Draw a line at","",class="input-small")
@@ -397,7 +411,7 @@ iPlot <- function(
                 multiselectInput(
                   "xfacet",
                   label = "X facets",
-                  choices = static$categories,
+                  choices = c("None",static$categories),
                   selected = static$categories[1],
                   options = list(
                     buttonClass = "btn btn-link",
@@ -414,7 +428,7 @@ iPlot <- function(
                 multiselectInput(
                   "yfacet",
                   label = "Y facets",
-                  choices = static$categories,
+                  choices = c("None",static$categories),
                   selected = static$categories[2],
                   options = list(
                     buttonClass = "btn btn-link",
