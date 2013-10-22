@@ -31,7 +31,7 @@ iData <- setRefClass(
       # Fix colnames due to css error (see issue #1)
       tmp <- data
       rpl <- function(x) gsub("\\.", "_", colnames(x))
-      if (is.data.table(tmp)) {
+      if ("data.table" %in% class(data)) {
         setnames(tmp, rpl(tmp))
       } else {
         colnames(tmp) <- rpl(tmp)
