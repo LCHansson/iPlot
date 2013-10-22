@@ -12,7 +12,8 @@ Depends:
     RJSONIO,
     ggplot2,
     sparkle,
-    ggthemes
+    ggthemes,
+    xtable
 Collate:
     'app.R'
     'plot.R'
