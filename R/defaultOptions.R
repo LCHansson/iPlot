@@ -9,7 +9,9 @@ defaultOptions <- function(options = list()) {
   defaultOptionsList <- list(
     graph = TRUE,
     table = TRUE,
-    na_handler = TRUE
+    na_handler = TRUE,
+    stack = FALSE,
+    facets = TRUE
   )
   
   lapply(names(defaultOptionsList), function(i) {

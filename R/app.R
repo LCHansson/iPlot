@@ -190,6 +190,16 @@ iPlot <- function(
             )
           }
           
+          if(input$method == 'facets') {
+            vars <- unique(c(input$density, input$fill, input$xfacet, input$yfacet))
+            vars <- vars[vars != "None"]
+            data <- na.omit(subset(data, select = vars))
+            p <- ggplot(data, aes_string(x = input$density, fill = ifelse(input$fill != "None", input$fill, FALSE))) + 
+              facet_grid(paste(input$yfacet, "~", input$xfacet)) +
+              geom_density(alpha = ifelse(require(pmreports),0.7,0.3)) + 
+              ggthemes::theme_tufte()
+          }
+          
           # Add pmreports styling if it is installed
           if(require(pmreports)) {
             p <- style_plot(p, colors=pm_colors(), base_size=16) + aes(alpha=0.7)
@@ -286,7 +296,8 @@ iPlot <- function(
                 label = "",
                 choices = c(
                   Composition = "comp",
-                  Regression = "regr"
+                  Regression = "regr",
+                  Facets = "facets"
                 ),
                 options = list(
                   includeSelectAllOption = F,
@@ -297,7 +308,7 @@ iPlot <- function(
             
             ## Shared graph menus
             conditionalPanel(
-              "input.method == 'comp' | input.method == 'regr'",
+              "input.method == 'comp' | input.method == 'regr' | input.method == 'facets'",
               div(
                 class="span2",
                 multiselectInput(
@@ -315,7 +326,7 @@ iPlot <- function(
             
             ## Composition graph menus
             conditionalPanel(
-              "input.method == 'comp'",
+              "input.method == 'comp' | input.method == 'facets'",
               div(
                 class="span2",
                 multiselectInput(
@@ -366,6 +377,40 @@ iPlot <- function(
                   label = "Y axis (dependent)",
                   choices = c(static$numerics,static$categories),
                   selected = c(static$numerics,static$categories)[2],
+                  options = list(
+                    buttonClass = "btn btn-link",
+                    includeSelectAllOption = T,
+                    enableFiltering = T
+                  )
+                )
+              )
+            ),
+            conditionalPanel(
+              "input.method == 'facets'",
+              div(
+                class="span2",
+                multiselectInput(
+                  "xfacet",
+                  label = "X facets",
+                  choices = static$categories,
+                  selected = static$categories[1],
+                  options = list(
+                    buttonClass = "btn btn-link",
+                    includeSelectAllOption = T,
+                    enableFiltering = T
+                  )
+                )
+              )
+            ),
+            conditionalPanel(
+              "input.method == 'facets'",
+              div(
+                class="span2",
+                multiselectInput(
+                  "yfacet",
+                  label = "Y facets",
+                  choices = static$categories,
+                  selected = static$categories[2],
                   options = list(
                     buttonClass = "btn btn-link",
                     includeSelectAllOption = T,
