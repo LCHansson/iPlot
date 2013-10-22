@@ -59,6 +59,14 @@ iPlot <- function(
       ui = bootstrapPage(
         includeCSS(system.file("css/custom.css", package="iPlot")),
 #         includeCSS("inst/css/custom.css"),
+        
+        tags$script(type = "text/javascript", "
+          $(function() { // Run when DOM ready
+            $(window).bind('beforeunload', function(e) {
+              Shiny.onInputChange('quit', true); // sets input$quit to true
+            });
+          });
+        "),
         div(
           class="row",
           
@@ -554,7 +562,7 @@ iPlot <- function(
             downloadButton("dlData", HTML("<i class=\"icon-download\"></i>"), "btn btn-link"), br(),
             downloadButton("dlGraph", HTML("<i class=\"icon-eye-open\"></i>"), "btn btn-link"), br(),
 #             actionButton2("options", "Advanced settings","btn action-button btn-primary btn-small btn-block btn-rmenu"),
-            actionButton2("quit", HTML("<i class=\"icon-off\"></i>"), "btn btn-link")
+            actionButton2("quit", HTML("<i class=\"icon-off\"></i>"), "btn action-button btn-link")
           )
         })
         
