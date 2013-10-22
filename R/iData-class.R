@@ -13,6 +13,7 @@ iData <- setRefClass(
         stop("Only data.frame or data.table are supported")
       }
       data <<- data
+      fix_data()
       update_fields()
     },
     update_fields = function() {
@@ -25,6 +26,17 @@ iData <- setRefClass(
     },
     filter = function(fun) {
       names(data)[sapply(data, fun)]
+    },
+    fix_data = function() {
+      # Fix colnames due to css error (see issue #1)
+      tmp <- data
+      rpl <- function(x) gsub("\\.", "_", colnames(x))
+      if (is.data.table(tmp)) {
+        setnames(tmp, rpl(tmp))
+      } else {
+        colnames(tmp) <- rpl(tmp)
+      }
+      data <<- tmp
     }
   )
 )
