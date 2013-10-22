@@ -68,62 +68,110 @@ iPlot <- function(
           });
         "),
         
+        uiOutput("mainUI")
+      ),
+      
+      ## SERVER ----------------------------------------------------------------
+      server = function(input, output, session) {
+
+        #### What is this? ping @reinholdsson ####
+        observe({
+          print(input$test)
+        })
         
-        div(
-          class="row",
+        
+        #### Main UI grid ####
+        
+        output$mainUI <- renderUI({
+          #### Define what components to include ####
+          # (Actually, this should also include the "filters" and "buttons"
+          # components. We'll implement that later...)
+          components <- c("graph", "table")
+          components <- components[components %in% names(options[options==TRUE])]
           
           #### Filters focus area ####
-          div(
+          filterUI <- div(
             class="span2",
-              uiOutput("select_filters"),
-              tags$hr(),
-              uiOutput("filters"),
-              uiOutput("cat_filter")
-
-          ),
-          
-          #### Graph focus area ####
-          div(
-            class="span8",
-            div(
-              class="row",
-              uiOutput("select_method")
-            ),
-            div(
-              class="row",
-              plotOutput("graph"),
-              tags$hr()
-            ),
+            uiOutput("select_filters"),
+            tags$hr(),
+            uiOutput("filters"),
+            uiOutput("cat_filter")
+          )
             
-            #### Table/numeric focus area ####
-            div(
-              class="row",
-              uiOutput("select_analysis")
-            ),
-            div(
-              class="row",
-              uiOutput("analysis")
+          mainUI <- lapply(components, function(i) {
+            tagList(
+              div(
+                class="row",
+                uiOutput(paste0("select_",i))
+              ),
+              div(
+                class="row",
+                plotOutput(i),
+                tags$hr()
+              )
             )
-          ),
+          })
           
-          #### Right column focus area ####
-          div(
+          buttonUI <- div(
             class="span2",
             div(
               class="row",
               div(class="span2",uiOutput("buttons"))
             )
           )
-        )
-      ),
-      
-      ## SERVER ----------------------------------------------------------------
-      server = function(input, output, session) {
-
-        observe({
-          print(input$test)
+          
+          div(class="row", 
+              filterUI,
+              div(class="span8",mainUI),
+              buttonUI
+          )
+          
+#           div(
+#             class="row",
+#             
+#             #### Filters focus area ####
+#             div(
+#               class="span2",
+#               uiOutput("select_filters"),
+#               tags$hr(),
+#               uiOutput("filters"),
+#               uiOutput("cat_filter")
+#             ),
+#             
+#             #### Graph focus area ####
+#             div(
+#               class="span8",
+#               div(
+#                 class="row",
+#                 uiOutput("select_graph")
+#               ),
+#               div(
+#                 class="row",
+#                 plotOutput("graph"),
+#                 tags$hr()
+#               ),
+#               
+#               #### Table/numeric focus area ####
+#               div(
+#                 class="row",
+#                 uiOutput("select_analysis")
+#               ),
+#               div(
+#                 class="row",
+#                 uiOutput("analysis")
+#               )
+#             ),
+#             
+#             #### Right column focus area ####
+#             div(
+#               class="span2",
+#               div(
+#                 class="row",
+#                 div(class="span2",uiOutput("buttons"))
+#               )
+#             )
+#           )
         })
-        
         
         #### Reactive internals ####
         
@@ -235,7 +283,7 @@ iPlot <- function(
           return(p)
         })
         
-        ## Quit button
+        ## Quit function
         observe({
           if(is.null(input$quit)) return()
           if(input$quit == 0) return()
@@ -304,7 +352,7 @@ iPlot <- function(
         
         #### GRAPH focus area ####
         
-        output$select_method <- renderUI({
+        output$select_graph <- renderUI({
           if(options$graph == FALSE) return()
           
           tagList(
@@ -441,7 +489,9 @@ iPlot <- function(
           )
         })
 
+        ## Plot output
         output$graph <- renderPlot({
+          # Don't draw graph if the graph option is set to FALSE
           if(options$graph == FALSE) return()
           
           # Do nothing if the UI components have not yet been defined
@@ -456,7 +506,7 @@ iPlot <- function(
         
         #### TABLE focus area ####
         
-        output$select_analysis <- renderUI({
+        output$select_table <- renderUI({
           if(options$table == FALSE) return()
           
           tagList(
@@ -514,7 +564,7 @@ iPlot <- function(
           )
         })
 
-        output$analysis <- renderUI({
+        output$table <- renderUI({
           if(options$table == FALSE) return()
           
           uiOutput(outputId = input$text_sel)
