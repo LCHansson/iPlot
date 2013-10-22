@@ -67,6 +67,8 @@ iPlot <- function(
             });
           });
         "),
+        
+        
         div(
           class="row",
           
@@ -164,7 +166,10 @@ iPlot <- function(
               x <- as.numeric(input$line_coords)
               p <- p + 
                 geom_vline(xintercept=x, size=1, linetype=5, alpha=0.7) + 
-                annotate("text",x=x, y=0, label=x, size=5, angle=90, vjust=-0.2, hjust=0, color="gray10", alpha=0.8)
+                annotate(
+                  "text",x=x, y=0, label=x,
+                  size=5, angle=90, vjust=-0.2, hjust=0, color="gray10", alpha=0.8
+                )
             }
           }
           
@@ -172,10 +177,17 @@ iPlot <- function(
             vars <- unique(c(input$fill, input$indepvar, input$depvar))
             vars <- vars[vars != "None"]
             data <- na.omit(subset(data, select = vars))
-            p <- ggplot(data,aes_string(x = input$indepvar, y = input$depvar, color = ifelse(input$fill != "None", input$fill, FALSE))) +
+            p <- ggplot(
+              data, aes_string(
+                x = input$indepvar,
+                y = input$depvar,
+                color = ifelse(input$fill != "None", input$fill, FALSE))
+              ) +
               geom_point(alpha=ifelse(require(pmreports),0.7,0.3)) +
               ggthemes::theme_tufte()
-            p <- p + geom_smooth(method = "lm", se=FALSE, linetype = 2, size = 1, color = "#5bc0de")
+            p <- p + geom_smooth(
+              method = "lm", se=FALSE, linetype = 2, size = 1, color = "#5bc0de"
+            )
           }
           
           # Add pmreports styling if it is installed
