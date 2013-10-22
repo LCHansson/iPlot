@@ -97,7 +97,8 @@ iPlot <- function(
             uiOutput("filters"),
             uiOutput("cat_filter")
           )
-            
+          
+          #### Graph and table focus areas #### 
           mainUI <- lapply(components, function(i) {
             tagList(
               div(
@@ -112,6 +113,7 @@ iPlot <- function(
             )
           })
           
+          #### Right column buttons focus area ####
           buttonUI <- div(
             class="span2",
             div(
@@ -125,52 +127,6 @@ iPlot <- function(
               div(class="span8",mainUI),
               buttonUI
           )
-          
-#           div(
-#             class="row",
-#             
-#             #### Filters focus area ####
-#             div(
-#               class="span2",
-#               uiOutput("select_filters"),
-#               tags$hr(),
-#               uiOutput("filters"),
-#               uiOutput("cat_filter")
-#             ),
-#             
-#             #### Graph focus area ####
-#             div(
-#               class="span8",
-#               div(
-#                 class="row",
-#                 uiOutput("select_graph")
-#               ),
-#               div(
-#                 class="row",
-#                 plotOutput("graph"),
-#                 tags$hr()
-#               ),
-#               
-#               #### Table/numeric focus area ####
-#               div(
-#                 class="row",
-#                 uiOutput("select_analysis")
-#               ),
-#               div(
-#                 class="row",
-#                 uiOutput("analysis")
-#               )
-#             ),
-#             
-#             #### Right column focus area ####
-#             div(
-#               class="span2",
-#               div(
-#                 class="row",
-#                 div(class="span2",uiOutput("buttons"))
-#               )
-#             )
-#           )
         })
         
         #### Reactive internals ####
@@ -328,7 +284,12 @@ iPlot <- function(
                   buttonText = sprintf("#! function(options, select) {return '%s (' + options.length + '/%s)'}!#", i, length(tbl))
                 )
               ),
-              checkboxInput(paste0("na", i), "Allow NA", T)
+              bootstrapCheckbox(paste0("na", i), "", value = T, options = list(
+                buttonStyle = "btn-link btn-small",
+                checkedClass = "icon-ok",
+                uncheckedClass = "icon-remove",
+                checked = T
+              ))
             )
           })
           do.call(tagList, selector_menu_list)
@@ -342,7 +303,12 @@ iPlot <- function(
                 height = ifelse(height/length(static$numerics) > 100, 100, height/length(static$numerics)), 
                 width = width*0.2, clickId = paste0("click", i)
               ),
-              checkboxInput(paste0("na", i), "Allow NA", T)
+              bootstrapCheckbox(paste0("na", i), "", value = T, options = list(
+                buttonStyle = "btn-link btn-small",
+                checkedClass = "icon-ok",
+                uncheckedClass = "icon-remove",
+                defaultState = T
+              ))
             )
           })
           
@@ -627,7 +593,6 @@ iPlot <- function(
         # the filter plots
         rv <- reactiveValues()
         
-        # Temp fix, clear reactive values
         # Still buggy! Plot keeps coordinates somehow?
         observe({
           non_sel <- static$numerics[!static$numerics %in% input$filter_sel]
