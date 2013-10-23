@@ -112,6 +112,27 @@ iPlot <- function(
               )
             )
           })
+          mainUI <- div(
+            class="span8",
+            div(
+              class="row",
+              uiOutput("select_graph")
+            ),
+            div(
+              class="row",
+              plotOutput("graph"),
+              tags$hr()
+            ),
+#             div(
+#               class="row",
+#               uiOutput("select_table")
+#             ),
+            div(
+              class="row",
+#               uiOutput("table"),
+              dataTableOutput("var_list")
+            )
+          )
           
           #### Right column buttons focus area ####
           buttonUI <- div(
@@ -124,7 +145,8 @@ iPlot <- function(
           
           div(class="row", 
               filterUI,
-              div(class="span8",mainUI),
+#               div(class="span8",mainUI),
+              mainUI,
               buttonUI
           )
         })
@@ -148,7 +170,20 @@ iPlot <- function(
               TRUE
             }
           })
-          static$data[Reduce("&", c(num_conditions, cat_conditions)), ]
+          data <- static$data[Reduce("&", c(num_conditions, cat_conditions)), ]
+
+          if(is.null(input$sampleButton)) return(data)
+          
+          if(input$sampleButton %% 2 == 1) {
+            if(nrow(data) > 50000) {
+              return(data[sort(sample(nrow(data), 10000)),])
+            } else {
+              return(data[sort(sample(nrow(data), nrow(data) %/% 5)),])
+            }
+          }
+          
+          return(data)
+          
         })
         
         ## Main plot
@@ -178,7 +213,8 @@ iPlot <- function(
                 annotate(
                   "text",x=x, y=0, label=x,
                   size=5, angle=90, vjust=-0.2, hjust=0, color="gray10", alpha=0.8
-                )
+                ) +
+                theme(axis.text.y=element_blank())
             }
           }
           
@@ -219,7 +255,8 @@ iPlot <- function(
                 annotate(
                   "text",x=x, y=0, label=x,
                   size=5, angle=90, vjust=-0.2, hjust=0, color="gray10", alpha=0.8
-                )
+                ) +
+                theme(axis.text.y=element_blank())
             }
           }
           
@@ -298,17 +335,18 @@ iPlot <- function(
         output$filters <- renderUI({
           plot_output_list <- lapply(reactive_nums(), function(i) {
             tagList(
-              plotOutput(
-                paste0("plot", i),
-                height = ifelse(height/length(static$numerics) > 100, 100, height/length(static$numerics)), 
-                width = width*0.2, clickId = paste0("click", i)
-              ),
+              HTML(i),
               bootstrapCheckbox(paste0("na", i), "", value = T, options = list(
                 buttonStyle = "btn-link btn-small",
                 checkedClass = "icon-ok",
                 uncheckedClass = "icon-remove",
                 defaultState = T
-              ))
+              )),
+              plotOutput(
+                paste0("plot", i),
+                height = ifelse(height/length(static$numerics) > 100, 100, height/length(static$numerics)), 
+                width = width*0.2, clickId = paste0("click", i)
+              )
             )
           })
           
@@ -472,106 +510,98 @@ iPlot <- function(
         
         #### TABLE focus area ####
         
-        output$select_table <- renderUI({
-          if(options$table == FALSE) return()
-          
-          tagList(
-            div(
-              class="span2",
-              multiselectInput(
-                "text_sel",
-                label = "",
-                choices = c(
-                  Variables = "data_view",
-                  Regression = "regr_table"
-                ),
-                selected = "Variables",
-                options = list(
-                  includeSelectAllOption = F,
-                  enableFiltering = F
-                )
-              )
-            ),
-            conditionalPanel(
-              "input.text_sel == 'data_view'",
-              div(
-                class="span2",
-                multiselectInput(
-                  "view_vars",
-                  label = "List variables",
-                  choices = c(static$numerics,static$categories),
-                  selected = c(static$numerics,static$categories)[1:2],
-                  multiple = T,
-                  options = list(
-                    buttonClass = "btn btn-link",
-                    includeSelectAllOption = T,
-                    enableFiltering = T
-                  )
-                )
-              )
-            ),
-            conditionalPanel(
-              "input.text_sel == 'data_view'",
-              div(
-                class="span2",
-                multiselectInput(
-                  "stat_properties",
-                  label = "Statistical properties",
-                  choices = stat_names,
-                  multiple = T,
-                  options = list(
-                    buttonClass = "btn btn-link",
-                    includeSelectAllOption = T,
-                    enableFiltering = T
-                  )
-                )
-              )
-            )
-          )
-        })
+#         output$select_table <- renderUI({
+#           if(options$table == FALSE) return()
+#           return()
+#           
+#           tagList(
+#             div(
+#               class="span2",
+#               multiselectInput(
+#                 "text_sel",
+#                 label = "",
+#                 choices = c(
+#                   Variables = "data_view",
+#                   Regression = "regr_table"
+#                 ),
+#                 selected = "Variables",
+#                 options = list(
+#                   includeSelectAllOption = F,
+#                   enableFiltering = F
+#                 )
+#               )
+#             ),
+#             conditionalPanel(
+#               "input.text_sel == 'data_view'",
+#               div(
+#                 class="span2",
+#                 multiselectInput(
+#                   "view_vars",
+#                   label = "List variables",
+#                   choices = c(static$numerics,static$categories),
+#                   selected = c(static$numerics,static$categories)[1:2],
+#                   multiple = T,
+#                   options = list(
+#                     buttonClass = "btn btn-link",
+#                     includeSelectAllOption = T,
+#                     enableFiltering = T
+#                   )
+#                 )
+#               )
+#             ),
+#             conditionalPanel(
+#               "input.text_sel == 'data_view'",
+#               div(
+#                 class="span2",
+#                 multiselectInput(
+#                   "stat_properties",
+#                   label = "Statistical properties",
+#                   choices = stat_names,
+#                   multiple = T,
+#                   options = list(
+#                     buttonClass = "btn btn-link",
+#                     includeSelectAllOption = T,
+#                     enableFiltering = T
+#                   )
+#                 )
+#               )
+#             )
+#           )
+#         })
 
         output$table <- renderUI({
-          if(options$table == FALSE) return()
-          
-          uiOutput(outputId = input$text_sel)
+#           if(options$table == FALSE) return()
+#           uiOutput(outputId = input$text_sel)
+#           uiOutput("data_view")
+          dataTableOutput("var_list")
         })
 
         output$data_view <- renderUI({
           div(
             class="span8",
-            tableOutput("var_list")
+            dataTableOutput("var_list")
           )
         })
         
-        output$var_list <- renderTable({
-          require(data.table)
-          if(!require(xtable)) return()
-          if(is.null(input$stat_properties)) return()
-          if(is.null(input$view_vars)) return()
-
+        output$var_list <- renderDataTable({
           
           data <- data.table(main_data())
           
-          ## ERROR: When only one variable is selected, the data.table below
-          ## does not behave normally and returns a vecor instead of a one-
-          ## column data.table. This distorts the algorithm!
-          comp_table <- data.table(sapply(input$stat_properties, function(i) {
-            sapply(data[,input$view_vars,with=F], function(x,i) {
-              if(i == "multiselect-all") return(0)
+          ## Create a table with analytical measures (as defined in stat_names above)
+          comp_table <- data.table(sapply(stat_names, function(i) {
+            sapply(data[,names(data)[names(data) %in% static$numerics],with=F], function(x,i) {
               eval(parse(text=i))
             }, i)
           }))
-          
-          # Remove the multiselect-all artifact and rename columns for output
-          if(length(input$stat_properties) > 1) {
-            comp_table <- comp_table[,names(comp_table) != "multiselect-all",with=F]
-          }
-          setnames(comp_table,names(comp_table), names(stat_names[stat_names %in% input$stat_properties]))
-          row.names(comp_table) <- input$view_vars
+
+          ## Add "Name" column to the front of the table
+          comp_table$Name <- names(data)[names(data) %in% static$numerics]
+          comp_table <- comp_table[,c(ncol(comp_table),1:ncol(comp_table)-1)]
           
           # Print the table
           return(comp_table)
-        })
+        }, options = list(aLengthMenu = c(5, 10, 25, 100), iDisplayLength = 5))
+        
         
         #### Regression model functions ####
         make_model <- function(model_type, formula, ...) {
@@ -652,11 +682,12 @@ iPlot <- function(
           tagList(
             downloadButton("dlData", HTML("<i class=\"icon-download\"></i>"), "btn btn-link"), br(),
             downloadButton("dlGraph", HTML("<i class=\"icon-eye-open\"></i>"), "btn btn-link"), br(),
-#             actionButton2("options", "Advanced settings","btn action-button btn-primary btn-small btn-block btn-rmenu"),
+            bootstrapCheckbox("sampleButton", "", options = list(checkedClass = "icon-ok-sign", uncheckedClass = "icon-fast-forward")),
             actionButton2("quit", HTML("<i class=\"icon-off\"></i>"), "btn action-button btn-link")
           )
         })
         
+        ## Download data button
         output$dlData <- downloadHandler(
           filename = function() {
             if("XLConnect" %in% rownames(installed.packages())) {
@@ -693,6 +724,7 @@ iPlot <- function(
           }
         )
         
+        ## Graph download button
         output$dlGraph <- downloadHandler(
           filename = function() "test.pdf",
           content = function(con) {
