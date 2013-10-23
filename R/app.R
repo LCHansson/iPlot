@@ -206,7 +206,8 @@ iPlot <- function(
             data <- na.omit(subset(data, select = vars))
             p <- ggplot(data, aes_string(x = input$density, fill = ifelse(input$fill != "None", input$fill, FALSE))) + 
               geom_density(alpha = ifelse(require(pmreports),0.7,0.3)) + 
-              ggthemes::theme_tufte()
+              ggthemes::theme_tufte() +
+              theme(axis.text.y=element_blank())
             
             if(input$line_coords != "") {
               x <- as.numeric(input$line_coords)
@@ -215,8 +216,7 @@ iPlot <- function(
                 annotate(
                   "text",x=x, y=0, label=x,
                   size=5, angle=90, vjust=-0.2, hjust=0, color="gray10", alpha=0.8
-                ) +
-                theme(axis.text.y=element_blank())
+                )
             }
           }
           
@@ -257,8 +257,7 @@ iPlot <- function(
                 annotate(
                   "text",x=x, y=0, label=x,
                   size=5, angle=90, vjust=-0.2, hjust=0, color="gray10", alpha=0.8
-                ) +
-                theme(axis.text.y=element_blank())
+                )
             }
           }
           
@@ -270,6 +269,11 @@ iPlot <- function(
           # If no fill variable is selected, hide the legend
           if(input$fill == "None") {
             p <- p + theme(legend.position="none")
+          }
+          
+          # Remove Y axis text if it is a density plot
+          if(input$method %in% c("comp","facets")) {
+            p <- p + theme(axis.text.y=element_blank())
           }
           
           # Write to console

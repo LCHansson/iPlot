@@ -20,10 +20,7 @@ iPlot(diamonds)
 # iPlot(testdata)
 
 
-load("C:/Utveckling/GARP-analys/.RData")
-rm(inkdata)
-rm(allaink2)
-gc()
+load("C:/Utveckling/DATA/pens_ink_data.RData")
 
-inkdata <- webapp_ink[,names(webapp_ink)[sapply(names(webapp_ink), function(i) all(!is.na(webapp_ink[[i]])))],with=F]
-iPlot(inkdata)
+
+iPlot(ink_full)
