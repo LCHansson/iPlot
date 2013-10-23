@@ -439,7 +439,7 @@ iPlot <- function(
                 class="span2",
                 multiselectInput(
                   "indepvar",
-                  label = "X axis (independent)",
+                  label = HTML("<i class=\"icon-resize-horizontal\"></i> x"),
                   choices = c(static$numerics,static$categories),
                   selected = c(static$numerics,static$categories)[1],
                   options = list(
@@ -456,7 +456,7 @@ iPlot <- function(
                 class="span2",
                 multiselectInput(
                   "depvar",
-                  label = "Y axis (dependent)",
+                  label = HTML("<i class=\"icon-resize-vertical\"></i> y"),
                   choices = c(static$numerics,static$categories),
                   selected = c(static$numerics,static$categories)[2],
                   options = list(
@@ -473,7 +473,7 @@ iPlot <- function(
                 class="span2",
                 multiselectInput(
                   "xfacet",
-                  label = "X facets",
+                  label = HTML("<i class=\"icon-th\"></i> x"),
                   choices = c("None",static$categories),
                   selected = static$categories[1],
                   options = list(
@@ -490,7 +490,7 @@ iPlot <- function(
                 class="span2",
                 multiselectInput(
                   "yfacet",
-                  label = "Y facets",
+                  label = HTML("<i class=\"icon-th\"></i> y"),
                   choices = c("None",static$categories),
                   selected = static$categories[2],
                   options = list(
