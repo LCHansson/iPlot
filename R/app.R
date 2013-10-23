@@ -633,12 +633,12 @@ iPlot <- function(
         
         #### RIGHT COLUMN focus area ####
         output$buttons <- renderUI({
-          tagList(
+          tagList(div(class = "opt-icons",
             downloadButton("dlData", HTML("<i class=\"icon-download\"></i>"), "btn btn-link"), br(),
             downloadButton("dlGraph", HTML("<i class=\"icon-eye-open\"></i>"), "btn btn-link"), br(),
             bootstrapCheckbox("sampleButton", "", options = list(checkedClass = "icon-ok-sign", uncheckedClass = "icon-fast-forward")),
             actionButton2("quit", HTML("<i class=\"icon-off\"></i>"), "btn action-button btn-link")
-          )
+          ))
         })
         
         ## Download data button

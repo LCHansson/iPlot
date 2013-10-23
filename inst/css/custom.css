@@ -101,7 +101,7 @@ td
 
 .bootstrap-checkbox {
   float: right;
-  padding-right: 10px;
+  padding-right: 20px;
 }
 
 .span2 {
@@ -112,6 +112,10 @@ td
   margin-top: -8px;
   margin-left: -15px;
   font-size: 13px;
+}
+
+.opt-icons {
+  position: absolute;
 }
 
 .shiny-output-error { visibility: hidden; }
