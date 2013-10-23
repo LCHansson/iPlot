@@ -319,6 +319,7 @@ iPlot <- function(
                 div(class = "var-text",
                   multiselectInput(
                     paste0("menu", i),
+                    #label = HTML("<i class=\"icon-filter\"></i>"),
                     label = "",
                     choices = names(tbl),
                     selected = names(tbl),

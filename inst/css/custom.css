@@ -5,7 +5,7 @@ body {
 }
 
 label {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 input, select, textarea {
@@ -87,15 +87,16 @@ td
   display: inline-block;
   width: 100%;
   vertical-align: bottom;
-  border-style: solid;
-  border-width: 1px;
-  border-radius: 5px;
+  //border-style: solid;
+  //border-width: 1px;
+  //border-radius: 5px;
 }
 
 .var-text {
   float: left;
   margin-top: 5px;
   margin-left: 5px;
+  font-size: 13px;
 }
 
 .bootstrap-checkbox {
@@ -110,7 +111,7 @@ td
 .multiselect.dropdown-toggle.btn.btn-link {
   margin-top: -8px;
   margin-left: -15px;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .shiny-output-error { visibility: hidden; }
