@@ -581,32 +581,24 @@ iPlot <- function(
         })
         
         output$var_list <- renderDataTable({
-#           require(data.table)
-#           if(!require(xtable)) return()
-#           if(is.null(input$stat_properties)) return()
-#           if(is.null(input$view_vars)) return()
-
           
           data <- data.table(main_data())
-#           browser()
           
-          ## ERROR: When only one variable is selected, the data.table below
-          ## does not behave normally and returns a vecor instead of a one-
-          ## column data.table. This distorts the algorithm!
+          ## Create a table with analytical measures (as defined in stat_names above)
           comp_table <- data.table(sapply(stat_names, function(i) {
             sapply(data[,names(data)[names(data) %in% static$numerics],with=F], function(x,i) {
               eval(parse(text=i))
             }, i)
           }))
-#           browser()
-          
-          # Remove the multiselect-all artifact and rename columns for output
-#           setnames(comp_table, names(comp_table), names(stat_names))
-          comp_table$name <- names(data)[names(data) %in% static$numerics]
+
+          ## Add "Name" column to the front of the table
+          comp_table$Name <- names(data)[names(data) %in% static$numerics]
+          comp_table <- comp_table[,c(ncol(comp_table),1:ncol(comp_table)-1)]
           
           # Print the table
           return(comp_table)
         })
+        
         
         #### Regression model functions ####
         make_model <- function(model_type, formula, ...) {
