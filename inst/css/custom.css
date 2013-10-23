@@ -82,3 +82,6 @@ td
   background-repeat: repeat-x;
   outline: 0;
 }
+
+.shiny-output-error { visibility: hidden; }
+.shiny-output-error:before { visibility: hidden; }
