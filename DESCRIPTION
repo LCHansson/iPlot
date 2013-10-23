@@ -3,7 +3,7 @@ Type: Package
 Title: Interactive Plot
 Version: 1.0
 Date: 2013-09-01
-Author: Thomas Reinholdsson
+Author: Thomas Reinholdsson, Love Hansson
 Maintainer: Thomas Reinholdsson <reinholdsson@gmail.com>
 Description: ...
 License: AGPLv3

@@ -213,7 +213,8 @@ iPlot <- function(
                 annotate(
                   "text",x=x, y=0, label=x,
                   size=5, angle=90, vjust=-0.2, hjust=0, color="gray10", alpha=0.8
-                )
+                ) +
+                theme(axis.text.y=element_blank())
             }
           }
           
@@ -254,7 +255,8 @@ iPlot <- function(
                 annotate(
                   "text",x=x, y=0, label=x,
                   size=5, angle=90, vjust=-0.2, hjust=0, color="gray10", alpha=0.8
-                )
+                ) +
+                theme(axis.text.y=element_blank())
             }
           }
           
@@ -333,17 +335,18 @@ iPlot <- function(
         output$filters <- renderUI({
           plot_output_list <- lapply(reactive_nums(), function(i) {
             tagList(
-              plotOutput(
-                paste0("plot", i),
-                height = ifelse(height/length(static$numerics) > 100, 100, height/length(static$numerics)), 
-                width = width*0.2, clickId = paste0("click", i)
-              ),
+              HTML(i),
               bootstrapCheckbox(paste0("na", i), "", value = T, options = list(
                 buttonStyle = "btn-link btn-small",
                 checkedClass = "icon-ok",
                 uncheckedClass = "icon-remove",
                 defaultState = T
-              ))
+              )),
+              plotOutput(
+                paste0("plot", i),
+                height = ifelse(height/length(static$numerics) > 100, 100, height/length(static$numerics)), 
+                width = width*0.2, clickId = paste0("click", i)
+              )
             )
           })
           
@@ -597,7 +600,7 @@ iPlot <- function(
           
           # Print the table
           return(comp_table)
-        })
+        }, options = list(aLengthMenu = c(5, 10, 25, 100), iDisplayLength = 5))
         
         
         #### Regression model functions ####
