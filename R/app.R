@@ -534,6 +534,8 @@ iPlot <- function(
         })
         
         output$var_list <- renderDataTable({
+          # todo: remove data.table dependency in code
+          require(data.table)
           
           data <- data.table(main_data())
           data <- data[, names(data)[names(data) %in% input$filter_sel], with=F]
