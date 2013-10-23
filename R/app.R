@@ -510,68 +510,7 @@ iPlot <- function(
         
         #### TABLE focus area ####
         
-#         output$select_table <- renderUI({
-#           if(options$table == FALSE) return()
-#           return()
-#           
-#           tagList(
-#             div(
-#               class="span2",
-#               multiselectInput(
-#                 "text_sel",
-#                 label = "",
-#                 choices = c(
-#                   Variables = "data_view",
-#                   Regression = "regr_table"
-#                 ),
-#                 selected = "Variables",
-#                 options = list(
-#                   includeSelectAllOption = F,
-#                   enableFiltering = F
-#                 )
-#               )
-#             ),
-#             conditionalPanel(
-#               "input.text_sel == 'data_view'",
-#               div(
-#                 class="span2",
-#                 multiselectInput(
-#                   "view_vars",
-#                   label = "List variables",
-#                   choices = c(static$numerics,static$categories),
-#                   selected = c(static$numerics,static$categories)[1:2],
-#                   multiple = T,
-#                   options = list(
-#                     buttonClass = "btn btn-link",
-#                     includeSelectAllOption = T,
-#                     enableFiltering = T
-#                   )
-#                 )
-#               )
-#             ),
-#             conditionalPanel(
-#               "input.text_sel == 'data_view'",
-#               div(
-#                 class="span2",
-#                 multiselectInput(
-#                   "stat_properties",
-#                   label = "Statistical properties",
-#                   choices = stat_names,
-#                   multiple = T,
-#                   options = list(
-#                     buttonClass = "btn btn-link",
-#                     includeSelectAllOption = T,
-#                     enableFiltering = T
-#                   )
-#                 )
-#               )
-#             )
-#           )
-#         })
-
         output$table <- renderUI({
-#           if(options$table == FALSE) return()
-#           uiOutput(outputId = input$text_sel)
 #           uiOutput("data_view")
           dataTableOutput("var_list")
         })
@@ -586,10 +525,11 @@ iPlot <- function(
         output$var_list <- renderDataTable({
           
           data <- data.table(main_data())
+          data <- data[, names(data)[names(data) %in% input$filter_sel], with=F]
           
           ## Create a table with analytical measures (as defined in stat_names above)
           comp_table <- data.table(sapply(stat_names, function(i) {
-            sapply(data[,names(data)[names(data) %in% static$numerics],with=F], function(x,i) {
+            sapply(data[, names(data)[names(data) %in% static$numerics], with=F], function(x,i) {
               eval(parse(text=i))
             }, i)
           }))
