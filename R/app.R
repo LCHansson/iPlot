@@ -130,7 +130,9 @@ iPlot <- function(
             div(
               class="row",
 #               uiOutput("table"),
-              dataTableOutput("var_list")
+              div(class="span8",
+                  dataTableOutput("var_list")
+              )
             )
           )
           
@@ -344,7 +346,7 @@ iPlot <- function(
               )),
               plotOutput(
                 paste0("plot", i),
-                height = ifelse(height/length(static$numerics) > 100, 100, height/length(static$numerics)), 
+                height = ifelse(height/length(static$numerics) > 100, 100, height/length(static$numerics))/2, 
                 width = width*0.2, clickId = paste0("click", i)
               )
             )
@@ -530,7 +532,10 @@ iPlot <- function(
           ## Create a table with analytical measures (as defined in stat_names above)
           comp_table <- data.table(sapply(stat_names, function(i) {
             sapply(data[, names(data)[names(data) %in% static$numerics], with=F], function(x,i) {
-              eval(parse(text=i))
+              format(
+                eval(parse(text=i)),
+                digits=4
+              )
             }, i)
           }))
 
@@ -540,7 +545,7 @@ iPlot <- function(
           
           # Print the table
           return(comp_table)
-        }, options = list(aLengthMenu = c(5, 10, 25, 100), iDisplayLength = 5))
+        }, options = list(aLengthMenu = c(5, 10, 25, 100), iDisplayLength = 5, bLengthChange = FALSE))
         
         
         #### Regression model functions ####
