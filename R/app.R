@@ -112,6 +112,27 @@ iPlot <- function(
               )
             )
           })
+          mainUI <- div(
+            class="span8",
+            div(
+              class="row",
+              uiOutput("select_graph")
+            ),
+            div(
+              class="row",
+              plotOutput("graph"),
+              tags$hr()
+            ),
+#             div(
+#               class="row",
+#               uiOutput("select_table")
+#             ),
+            div(
+              class="row",
+#               uiOutput("table"),
+              dataTableOutput("var_list")
+            )
+          )
           
           #### Right column buttons focus area ####
           buttonUI <- div(
@@ -124,7 +145,8 @@ iPlot <- function(
           
           div(class="row", 
               filterUI,
-              div(class="span8",mainUI),
+#               div(class="span8",mainUI),
+              mainUI,
               buttonUI
           )
         })
@@ -149,14 +171,14 @@ iPlot <- function(
             }
           })
           data <- static$data[Reduce("&", c(num_conditions, cat_conditions)), ]
-#           browser()
+
           if(is.null(input$sampleButton)) return(data)
           
           if(input$sampleButton %% 2 == 1) {
             if(nrow(data) > 50000) {
               return(data[sort(sample(nrow(data), 10000)),])
             } else {
-              return(data[sort(sample(nrow(data), nrow(data) %/% 10)),])
+              return(data[sort(sample(nrow(data), nrow(data) %/% 5)),])
             }
           }
           
@@ -485,102 +507,102 @@ iPlot <- function(
         
         #### TABLE focus area ####
         
-        output$select_table <- renderUI({
-          if(options$table == FALSE) return()
-          
-          tagList(
-            div(
-              class="span2",
-              multiselectInput(
-                "text_sel",
-                label = "",
-                choices = c(
-                  Variables = "data_view",
-                  Regression = "regr_table"
-                ),
-                selected = "Variables",
-                options = list(
-                  includeSelectAllOption = F,
-                  enableFiltering = F
-                )
-              )
-            ),
-            conditionalPanel(
-              "input.text_sel == 'data_view'",
-              div(
-                class="span2",
-                multiselectInput(
-                  "view_vars",
-                  label = "List variables",
-                  choices = c(static$numerics,static$categories),
-                  selected = c(static$numerics,static$categories)[1:2],
-                  multiple = T,
-                  options = list(
-                    buttonClass = "btn btn-link",
-                    includeSelectAllOption = T,
-                    enableFiltering = T
-                  )
-                )
-              )
-            ),
-            conditionalPanel(
-              "input.text_sel == 'data_view'",
-              div(
-                class="span2",
-                multiselectInput(
-                  "stat_properties",
-                  label = "Statistical properties",
-                  choices = stat_names,
-                  multiple = T,
-                  options = list(
-                    buttonClass = "btn btn-link",
-                    includeSelectAllOption = T,
-                    enableFiltering = T
-                  )
-                )
-              )
-            )
-          )
-        })
+#         output$select_table <- renderUI({
+#           if(options$table == FALSE) return()
+#           return()
+#           
+#           tagList(
+#             div(
+#               class="span2",
+#               multiselectInput(
+#                 "text_sel",
+#                 label = "",
+#                 choices = c(
+#                   Variables = "data_view",
+#                   Regression = "regr_table"
+#                 ),
+#                 selected = "Variables",
+#                 options = list(
+#                   includeSelectAllOption = F,
+#                   enableFiltering = F
+#                 )
+#               )
+#             ),
+#             conditionalPanel(
+#               "input.text_sel == 'data_view'",
+#               div(
+#                 class="span2",
+#                 multiselectInput(
+#                   "view_vars",
+#                   label = "List variables",
+#                   choices = c(static$numerics,static$categories),
+#                   selected = c(static$numerics,static$categories)[1:2],
+#                   multiple = T,
+#                   options = list(
+#                     buttonClass = "btn btn-link",
+#                     includeSelectAllOption = T,
+#                     enableFiltering = T
+#                   )
+#                 )
+#               )
+#             ),
+#             conditionalPanel(
+#               "input.text_sel == 'data_view'",
+#               div(
+#                 class="span2",
+#                 multiselectInput(
+#                   "stat_properties",
+#                   label = "Statistical properties",
+#                   choices = stat_names,
+#                   multiple = T,
+#                   options = list(
+#                     buttonClass = "btn btn-link",
+#                     includeSelectAllOption = T,
+#                     enableFiltering = T
+#                   )
+#                 )
+#               )
+#             )
+#           )
+#         })
 
         output$table <- renderUI({
-          if(options$table == FALSE) return()
-          
-          uiOutput(outputId = input$text_sel)
+#           if(options$table == FALSE) return()
+#           uiOutput(outputId = input$text_sel)
+#           uiOutput("data_view")
+          dataTableOutput("var_list")
         })
 
         output$data_view <- renderUI({
           div(
             class="span8",
-            tableOutput("var_list")
+            dataTableOutput("var_list")
           )
         })
         
-        output$var_list <- renderTable({
-          require(data.table)
-          if(!require(xtable)) return()
-          if(is.null(input$stat_properties)) return()
-          if(is.null(input$view_vars)) return()
+        output$var_list <- renderDataTable({
+#           require(data.table)
+#           if(!require(xtable)) return()
+#           if(is.null(input$stat_properties)) return()
+#           if(is.null(input$view_vars)) return()
 
           
           data <- data.table(main_data())
+#           browser()
           
           ## ERROR: When only one variable is selected, the data.table below
           ## does not behave normally and returns a vecor instead of a one-
           ## column data.table. This distorts the algorithm!
-          comp_table <- data.table(sapply(input$stat_properties, function(i) {
-            sapply(data[,input$view_vars,with=F], function(x,i) {
-              if(i == "multiselect-all") return(0)
+          comp_table <- data.table(sapply(stat_names, function(i) {
+            sapply(data[,names(data)[names(data) %in% static$numerics],with=F], function(x,i) {
               eval(parse(text=i))
             }, i)
           }))
+#           browser()
           
           # Remove the multiselect-all artifact and rename columns for output
-          if(length(input$stat_properties) > 1) {
-            comp_table <- comp_table[,names(comp_table) != "multiselect-all",with=F]
-          }
-          setnames(comp_table,names(comp_table), names(stat_names[stat_names %in% input$stat_properties]))
-          row.names(comp_table) <- input$view_vars
+#           setnames(comp_table, names(comp_table), names(stat_names))
+          comp_table$name <- names(data)[names(data) %in% static$numerics]
           
           # Print the table
           return(comp_table)
