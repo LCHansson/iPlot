@@ -18,7 +18,7 @@
 iPlot <- function(
   data = ggplot2::diamonds,
   height = 600,
-  width = 800,
+  width = 700,
   geom = NULL,
   liveSearchLimit = 7,
   options = list(),
@@ -113,7 +113,7 @@ iPlot <- function(
             )
           })
           mainUI <- div(
-            class="span8",
+            class="span9",
             div(
               class="row",
               uiOutput("select_graph")
@@ -130,7 +130,7 @@ iPlot <- function(
             div(
               class="row",
 #               uiOutput("table"),
-              div(class="span8",
+              div(class="span9",
                   dataTableOutput("var_list")
               )
             )
@@ -138,10 +138,10 @@ iPlot <- function(
           
           #### Right column buttons focus area ####
           buttonUI <- div(
-            class="span2",
+            class="span1",
             div(
               class="row",
-              div(class="span2",uiOutput("buttons"))
+              div(class="span1",uiOutput("buttons"))
             )
           )
           
@@ -298,14 +298,15 @@ iPlot <- function(
           choices <- c(static$numerics,static$categories)
           multiselectInput(
             "filter_sel",
-            label = "",
+            label = HTML("<i class=\"icon-filter\"></i> variables"),
             choices = choices,
             selected = c(static$numerics[1:2],static$categories[1:2]),
             multiple = T,
             options = list(
+              buttonClass = "btn btn-link",
               includeSelectAllOption = T,
               enableFiltering = T,
-              buttonText = sprintf("#! function(options, select) {return 'Variables (' + options.length + '/%s)'}!#", length(choices))
+              buttonText = sprintf("#! function(options, select) {return options.length + '/%s'}!#", length(choices))
             )
           )
         })
@@ -314,25 +315,28 @@ iPlot <- function(
           selector_menu_list <- lapply(reactive_cats(), function(i) {
             tbl <- table(static$data[[i]])
             tagList(
-              multiselectInput(
-                paste0("menu", i),
-                label = "",
-                choices = names(tbl),
-                selected = names(tbl),
-                multiple = T,
-                options = list(
-                  buttonClass = "btn btn-link",
-                  includeSelectAllOption = T,
-                  enableFiltering = T,
-                  buttonText = sprintf("#! function(options, select) {return '%s (' + options.length + '/%s)'}!#", i, length(tbl))
-                )
-              ),
-              bootstrapCheckbox(paste0("na", i), "", value = T, options = list(
-                buttonStyle = "btn-link btn-small",
-                checkedClass = "icon-ok",
-                uncheckedClass = "icon-remove",
-                checked = T
-              ))
+              div(class = "var",
+                div(class = "var-text",
+                  multiselectInput(
+                    paste0("menu", i),
+                    #label = HTML("<i class=\"icon-filter\"></i>"),
+                    label = "",
+                    choices = names(tbl),
+                    selected = names(tbl),
+                    multiple = T,
+                    options = list(
+                      buttonClass = "btn btn-link",
+                      includeSelectAllOption = T,
+                      enableFiltering = T,
+                      buttonText = sprintf("#! function(options, select) {return '%s ' + options.length + '/%s'}!#", i, length(tbl))
+                    )
+                )),
+                bootstrapCheckbox(paste0("na", i), "", value = T, options = list(
+                  buttonStyle = "btn-link btn-small",
+                  checkedClass = "icon-ok",
+                  uncheckedClass = "icon-remove",
+                  checked = T
+              )))
             )
           })
           do.call(tagList, selector_menu_list)
@@ -340,14 +344,14 @@ iPlot <- function(
         
         output$filters <- renderUI({
           plot_output_list <- lapply(reactive_nums(), function(i) {
-            tagList(
-              HTML(i),
+            tagList(div(class = "var",
+              div(class = "var-text", HTML(i)),
               bootstrapCheckbox(paste0("na", i), "", value = T, options = list(
                 buttonStyle = "btn-link btn-small",
                 checkedClass = "icon-ok",
                 uncheckedClass = "icon-remove",
                 defaultState = T
-              )),
+              ))),
               plotOutput(
                 paste0("plot", i),
                 height = ifelse(height/length(static$numerics) > 100, 100, height/length(static$numerics))/2, 
@@ -370,13 +374,14 @@ iPlot <- function(
               class="span2",
               multiselectInput(
                 "method",
-                label = "",
+                label = HTML("<i class=\"icon-signal\"></i> graph"),
                 choices = c(
                   Composition = "comp",
                   Scatter = "scatter",
                   Facets = "facets"
                 ),
                 options = list(
+                  buttonClass = "btn btn-link",
                   includeSelectAllOption = F,
                   enableFiltering = F
                 )
@@ -390,7 +395,7 @@ iPlot <- function(
                 class="span2",
                 multiselectInput(
                   "fill",
-                  label = "Select fill variable:",
+                  label = HTML("<i class=\"icon-tint\"></i> fill"),
                   choices = c("None",static$categories),
                   options = list(
                     buttonClass = "btn btn-link",
@@ -408,7 +413,7 @@ iPlot <- function(
                 class="span2",
                 multiselectInput(
                   "density",
-                  label = "Select density variable:",
+                  label = HTML("<i class=\"icon-certificate\"></i> density"),
                   choices = static$numerics,
                   options = list(
                     buttonClass = "btn btn-link",
@@ -423,7 +428,7 @@ iPlot <- function(
               "input.method == 'comp' | input.method == 'facets'",
               div(
                 class="span2",
-                textInput2("line_coords", "Draw a line at","",class="input-small")
+                textInput2("line_coords", HTML("<i class=\"icon-indent-right\"></i> line"),"",class="input-small")
               )
             ),
             
@@ -434,7 +439,7 @@ iPlot <- function(
                 class="span2",
                 multiselectInput(
                   "indepvar",
-                  label = "X axis (independent)",
+                  label = HTML("<i class=\"icon-resize-horizontal\"></i> x"),
                   choices = c(static$numerics,static$categories),
                   selected = c(static$numerics,static$categories)[1],
                   options = list(
@@ -451,7 +456,7 @@ iPlot <- function(
                 class="span2",
                 multiselectInput(
                   "depvar",
-                  label = "Y axis (dependent)",
+                  label = HTML("<i class=\"icon-resize-vertical\"></i> y"),
                   choices = c(static$numerics,static$categories),
                   selected = c(static$numerics,static$categories)[2],
                   options = list(
@@ -468,7 +473,7 @@ iPlot <- function(
                 class="span2",
                 multiselectInput(
                   "xfacet",
-                  label = "X facets",
+                  label = HTML("<i class=\"icon-th\"></i> x"),
                   choices = c("None",static$categories),
                   selected = static$categories[1],
                   options = list(
@@ -485,7 +490,7 @@ iPlot <- function(
                 class="span2",
                 multiselectInput(
                   "yfacet",
-                  label = "Y facets",
+                  label = HTML("<i class=\"icon-th\"></i> y"),
                   choices = c("None",static$categories),
                   selected = static$categories[2],
                   options = list(
@@ -529,6 +534,8 @@ iPlot <- function(
         })
         
         output$var_list <- renderDataTable({
+          # todo: remove data.table dependency in code
+          require(data.table)
           
           data <- data.table(main_data())
           data <- data[, names(data)[names(data) %in% input$filter_sel], with=F]
@@ -628,12 +635,13 @@ iPlot <- function(
         
         #### RIGHT COLUMN focus area ####
         output$buttons <- renderUI({
-          tagList(
+          tagList(div(class = "opt-icons",
+            HTML("options"), br(),
             downloadButton("dlData", HTML("<i class=\"icon-download\"></i>"), "btn btn-link"), br(),
             downloadButton("dlGraph", HTML("<i class=\"icon-eye-open\"></i>"), "btn btn-link"), br(),
-            bootstrapCheckbox("sampleButton", "", options = list(checkedClass = "icon-ok-sign", uncheckedClass = "icon-fast-forward")),
-            actionButton2("quit", HTML("<i class=\"icon-off\"></i>"), "btn action-button btn-link")
-          )
+            actionButton2("quit", HTML("<i class=\"icon-off\"></i>"), "btn action-button btn-link"), br(), br(),
+            HTML("sample"), bootstrapCheckbox("sampleButton", "", options = list(checkedClass = "icon-fast-forward", uncheckedClass = "icon-play"))
+          ))
         })
         
         ## Download data button
