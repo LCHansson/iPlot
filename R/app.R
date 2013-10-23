@@ -18,7 +18,7 @@
 iPlot <- function(
   data = ggplot2::diamonds,
   height = 600,
-  width = 800,
+  width = 700,
   geom = NULL,
   liveSearchLimit = 7,
   options = list(),
@@ -634,10 +634,11 @@ iPlot <- function(
         #### RIGHT COLUMN focus area ####
         output$buttons <- renderUI({
           tagList(div(class = "opt-icons",
+            HTML("options"), br(),
             downloadButton("dlData", HTML("<i class=\"icon-download\"></i>"), "btn btn-link"), br(),
             downloadButton("dlGraph", HTML("<i class=\"icon-eye-open\"></i>"), "btn btn-link"), br(),
-            bootstrapCheckbox("sampleButton", "", options = list(checkedClass = "icon-ok-sign", uncheckedClass = "icon-fast-forward")),
-            actionButton2("quit", HTML("<i class=\"icon-off\"></i>"), "btn action-button btn-link")
+            actionButton2("quit", HTML("<i class=\"icon-off\"></i>"), "btn action-button btn-link"), br(), br(),
+            HTML("sample"), bootstrapCheckbox("sampleButton", "", options = list(checkedClass = "icon-fast-forward", uncheckedClass = "icon-play"))
           ))
         })
         

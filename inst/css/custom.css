@@ -116,6 +116,7 @@ td
 
 .opt-icons {
   position: absolute;
+  text-align: center;
 }
 
 .shiny-output-error { visibility: hidden; }
