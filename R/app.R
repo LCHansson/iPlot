@@ -93,7 +93,7 @@ iPlot <- function(
           filterUI <- div(
             class="span2",
             uiOutput("select_filters"),
-            tags$hr(),
+            br(),
             uiOutput("filters"),
             uiOutput("cat_filter")
           )
@@ -107,8 +107,7 @@ iPlot <- function(
               ),
               div(
                 class="row",
-                plotOutput(i),
-                tags$hr()
+                plotOutput(i), br()
               )
             )
           })
@@ -120,8 +119,7 @@ iPlot <- function(
             ),
             div(
               class="row",
-              plotOutput("graph"),
-              tags$hr()
+              plotOutput("graph")
             ),
 #             div(
 #               class="row",
