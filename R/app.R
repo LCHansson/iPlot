@@ -298,14 +298,15 @@ iPlot <- function(
           choices <- c(static$numerics,static$categories)
           multiselectInput(
             "filter_sel",
-            label = "",
+            label = HTML("<i class=\"icon-filter\"></i> variables"),
             choices = choices,
             selected = c(static$numerics[1:2],static$categories[1:2]),
             multiple = T,
             options = list(
+              buttonClass = "btn btn-link",
               includeSelectAllOption = T,
               enableFiltering = T,
-              buttonText = sprintf("#! function(options, select) {return 'Variables (' + options.length + '/%s)'}!#", length(choices))
+              buttonText = sprintf("#! function(options, select) {return options.length + '/%s'}!#", length(choices))
             )
           )
         })
@@ -326,7 +327,7 @@ iPlot <- function(
                       buttonClass = "btn btn-link",
                       includeSelectAllOption = T,
                       enableFiltering = T,
-                      buttonText = sprintf("#! function(options, select) {return '%s (' + options.length + '/%s)'}!#", i, length(tbl))
+                      buttonText = sprintf("#! function(options, select) {return '%s ' + options.length + '/%s'}!#", i, length(tbl))
                     )
                 )),
                 bootstrapCheckbox(paste0("na", i), "", value = T, options = list(
@@ -372,13 +373,14 @@ iPlot <- function(
               class="span2",
               multiselectInput(
                 "method",
-                label = "",
+                label = HTML("<i class=\"icon-signal\"></i> graph"),
                 choices = c(
                   Composition = "comp",
                   Scatter = "scatter",
                   Facets = "facets"
                 ),
                 options = list(
+                  buttonClass = "btn btn-link",
                   includeSelectAllOption = F,
                   enableFiltering = F
                 )
@@ -392,7 +394,7 @@ iPlot <- function(
                 class="span2",
                 multiselectInput(
                   "fill",
-                  label = "Select fill variable:",
+                  label = HTML("<i class=\"icon-tint\"></i> fill"),
                   choices = c("None",static$categories),
                   options = list(
                     buttonClass = "btn btn-link",
@@ -410,7 +412,7 @@ iPlot <- function(
                 class="span2",
                 multiselectInput(
                   "density",
-                  label = "Select density variable:",
+                  label = HTML("<i class=\"icon-certificate\"></i> density"),
                   choices = static$numerics,
                   options = list(
                     buttonClass = "btn btn-link",
@@ -425,7 +427,7 @@ iPlot <- function(
               "input.method == 'comp' | input.method == 'facets'",
               div(
                 class="span2",
-                textInput2("line_coords", "Draw a line at","",class="input-small")
+                textInput2("line_coords", HTML("<i class=\"icon-indent-right\"></i> line"),"",class="input-small")
               )
             ),
             
