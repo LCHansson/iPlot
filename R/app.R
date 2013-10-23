@@ -113,7 +113,7 @@ iPlot <- function(
             )
           })
           mainUI <- div(
-            class="span8",
+            class="span9",
             div(
               class="row",
               uiOutput("select_graph")
@@ -130,7 +130,7 @@ iPlot <- function(
             div(
               class="row",
 #               uiOutput("table"),
-              div(class="span8",
+              div(class="span9",
                   dataTableOutput("var_list")
               )
             )
@@ -138,10 +138,10 @@ iPlot <- function(
           
           #### Right column buttons focus area ####
           buttonUI <- div(
-            class="span2",
+            class="span1",
             div(
               class="row",
-              div(class="span2",uiOutput("buttons"))
+              div(class="span1",uiOutput("buttons"))
             )
           )
           
