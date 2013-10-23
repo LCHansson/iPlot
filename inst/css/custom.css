@@ -83,5 +83,34 @@ td
   outline: 0;
 }
 
+.var {
+  display: inline-block;
+  width: 100%;
+  vertical-align: bottom;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 5px;
+}
+
+.var-text {
+  float: left;
+  margin-top: 5px;
+  margin-left: 5px;
+}
+
+.bootstrap-checkbox {
+  float: right;
+  padding-right: 10px;
+}
+
+.span2 {
+  margin-right: 5px;
+}
+
+.multiselect.dropdown-toggle.btn.btn-link {
+  margin-top: -10px;
+  margin-left: -15px;
+}
+
 .shiny-output-error { visibility: hidden; }
 .shiny-output-error:before { visibility: hidden; }

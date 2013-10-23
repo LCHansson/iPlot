@@ -314,25 +314,27 @@ iPlot <- function(
           selector_menu_list <- lapply(reactive_cats(), function(i) {
             tbl <- table(static$data[[i]])
             tagList(
-              multiselectInput(
-                paste0("menu", i),
-                label = "",
-                choices = names(tbl),
-                selected = names(tbl),
-                multiple = T,
-                options = list(
-                  buttonClass = "btn btn-link",
-                  includeSelectAllOption = T,
-                  enableFiltering = T,
-                  buttonText = sprintf("#! function(options, select) {return '%s (' + options.length + '/%s)'}!#", i, length(tbl))
-                )
-              ),
-              bootstrapCheckbox(paste0("na", i), "", value = T, options = list(
-                buttonStyle = "btn-link btn-small",
-                checkedClass = "icon-ok",
-                uncheckedClass = "icon-remove",
-                checked = T
-              ))
+              div(class = "var",
+                div(class = "var-text",
+                  multiselectInput(
+                    paste0("menu", i),
+                    label = "",
+                    choices = names(tbl),
+                    selected = names(tbl),
+                    multiple = T,
+                    options = list(
+                      buttonClass = "btn btn-link",
+                      includeSelectAllOption = T,
+                      enableFiltering = T,
+                      buttonText = sprintf("#! function(options, select) {return '%s (' + options.length + '/%s)'}!#", i, length(tbl))
+                    )
+                )),
+                bootstrapCheckbox(paste0("na", i), "", value = T, options = list(
+                  buttonStyle = "btn-link btn-small",
+                  checkedClass = "icon-ok",
+                  uncheckedClass = "icon-remove",
+                  checked = T
+              )))
             )
           })
           do.call(tagList, selector_menu_list)
@@ -340,14 +342,14 @@ iPlot <- function(
         
         output$filters <- renderUI({
           plot_output_list <- lapply(reactive_nums(), function(i) {
-            tagList(
-              HTML(i),
+            tagList(div(class = "var",
+              div(class = "var-text", HTML(i)),
               bootstrapCheckbox(paste0("na", i), "", value = T, options = list(
                 buttonStyle = "btn-link btn-small",
                 checkedClass = "icon-ok",
                 uncheckedClass = "icon-remove",
                 defaultState = T
-              )),
+              ))),
               plotOutput(
                 paste0("plot", i),
                 height = ifelse(height/length(static$numerics) > 100, 100, height/length(static$numerics))/2, 
