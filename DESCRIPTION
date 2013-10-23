@@ -5,15 +5,19 @@ Version: 1.0
 Date: 2013-09-01
 Author: Thomas Reinholdsson, Love Hansson
 Maintainer: Thomas Reinholdsson <reinholdsson@gmail.com>
-Description: ...
+Description: iPlot is a data exploration tool that features a range of visual
+    and numeric analytical tools in a minimalistic interface. Built mainly on
+    shiny and ggplot2, iPlot is still in its early stages of development but is
+    already usable for exploring data. Run iPlot from an R session with any
+    data set or use the 'sliver' package (also in development) for a preloader
+    GUI.
 License: AGPLv3
 Depends:
     shiny,
     RJSONIO,
     ggplot2,
     sparkle,
-    ggthemes,
-    xtable
+    ggthemes
 Collate:
     'app.R'
     'plot.R'
