@@ -24,6 +24,8 @@ iPlot <- function(
   options = list(),
   ...
 ){
+  if(require(pmreports)) { pmrep <- TRUE } else { pmrep <- FALSE }
+  
   
   if(!is.null(geom)) warning("Parameter 'geom' is deprecated. Please stop using it.")
   
@@ -203,7 +205,7 @@ iPlot <- function(
             vars <- vars[vars != "None"]
             data <- na.omit(subset(data, select = vars))
             p <- ggplot(data, aes_string(x = input$density, fill = ifelse(input$fill != "None", input$fill, FALSE))) + 
-              geom_density(alpha = ifelse(require(pmreports),0.7,0.3)) + 
+              geom_density(alpha = ifelse(pmrep,0.7,0.3)) + 
               ggthemes::theme_tufte() +
               theme(axis.text.y=element_blank())
             
@@ -228,7 +230,7 @@ iPlot <- function(
                 y = input$depvar,
                 color = ifelse(input$fill != "None", input$fill, FALSE))
               ) +
-              geom_point(alpha=ifelse(require(pmreports),0.7,0.3)) +
+              geom_point(alpha=ifelse(pmrep,0.7,0.3)) +
               ggthemes::theme_tufte()
             p <- p + geom_smooth(
               method = "lm", se=FALSE, linetype = 2, size = 1, color = "#5bc0de"
@@ -245,7 +247,7 @@ iPlot <- function(
                 "~",
                 ifelse(input$xfacet != "None", input$xfacet, ".")
                 )) +
-              geom_density(alpha = ifelse(require(pmreports),0.7,0.3)) + 
+              geom_density(alpha = ifelse(pmrep,0.7,0.3)) + 
               ggthemes::theme_tufte()
             
             if(input$line_coords != "") {
@@ -260,7 +262,7 @@ iPlot <- function(
           }
           
           # Add pmreports styling if it is installed
-          if(require(pmreports)) {
+          if(pmrep) {
             p <- style_plot(p, colors=pm_colors(), base_size=16) + aes(alpha=0.7)
           }
           
