@@ -5,7 +5,12 @@ A visualization app using click events for static plots in [shiny](https://githu
     library(iPlot)
     iPlot(ggplot2::diamonds)
 
-![iPlot](https://dl.dropboxusercontent.com/u/2904328/iPlot.png)
+Example apps on glimmer:
+
+- [iPlot with ggplot2::diamonds](http://glimmer.rstudio.com/reinholdsson/iplot/)
+- [iPlot with MASS::survey](http://glimmer.rstudio.com/reinholdsson/iplot-survey/)
+
+[![iPlot](https://dl.dropboxusercontent.com/u/2904328/iPlot.png)](http://glimmer.rstudio.com/reinholdsson/iplot-survey/)
 
 ## Instructions
 
