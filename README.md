@@ -12,6 +12,14 @@ Example apps on glimmer:
 
 [![iPlot](https://dl.dropboxusercontent.com/u/2904328/iPlot.png)](http://glimmer.rstudio.com/reinholdsson/iplot-survey/)
 
+## Installation
+
+    # install.packages("devtools")
+    library(devtools)
+    install_github("sparkle", "metagraf")
+    install_github("iPlot", "SwedishPensionsAgency")
+    library(iPlot)
+
 ## Instructions
 
 Click on the upper/lower part of the smaller plots to filter the data of the main plot.
